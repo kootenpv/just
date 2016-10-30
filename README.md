@@ -26,9 +26,13 @@ just.write(csv, "myfile.csv")
 just.write(pkl, "myfile.pkl")
 ```
 
-### TODO
+### Install
 
-- csv should probably use the smart builtin csv Sniffer
+Code is under CI, works on python 2 and 3:
+
+    pip install just
+
+### TODO
 
 - Implement a way to handle paths, e.g.:
 
@@ -37,6 +41,8 @@ just.write(pkl, "myfile.pkl")
 - Or implement a way to set a base bath for a project globally
 
 - Add streaming reader/writers, `just.iread` and `just.iwrite`
+
+- csv should probably use the smart builtin csv Sniffer
 
 - Add optional backends like urllib, requests, bs4, lxml, pandas
 
