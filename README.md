@@ -9,13 +9,31 @@
 `just.read` a file like:
 
 ```python
-txt = just.read("bla.txt")
-json = just.read("bla.json")
+txt = just.read("myfile.txt")
+json = just.read("myfile.json")
+yaml = just.read("myfile.yaml")
+csv = just.read("myfile.csv")
+pkl = just.read("myfile.pkl")
 ```
 
 `just.write` a file like:
 
 ```python
-just.write(txt, "bla.txt")
-just.write(json, "bla.json")
+just.write(txt, "myfile.txt")
+just.write(json, "myfile.json")
+just.write(yaml, "myfile.yaml")
+just.write(csv, "myfile.csv")
+just.write(pkl, "myfile.pkl")
 ```
+
+### TODO
+
+- Implement a way to handle paths, e.g.:
+
+    just.read("base", "path", "myfile.txt")
+
+- Or implement a way to set a base bath for a project globally
+
+- Add optional backends like urllib, requests, bs4, lxml
+
+- Add requests.get/post to return "aware" content, e.g. json/txt
