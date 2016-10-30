@@ -4,6 +4,12 @@
 [![PyPI](https://img.shields.io/pypi/v/just.svg?style=flat-square)](https://pypi.python.org/pypi/just/)
 [![PyPI](https://img.shields.io/pypi/pyversions/just.svg?style=flat-square)](https://pypi.python.org/pypi/just/)
 
+### Reasons
+
+- You like the safety of `with` statements, just not in *your* code: let `just` take care of it.
+
+- You like a computer to figure out how to load a file based on extension.
+
 ### Intro
 
 `just.read` a file like:
@@ -14,6 +20,13 @@ json = just.read("myfile.json")
 yaml = just.read("myfile.yaml")
 csv = just.read("myfile.csv")
 pkl = just.read("myfile.pkl")
+```
+
+Multi-read is also possible:
+
+```python
+txts = just.read(["file1.txt", "file2.txt"])
+txts = just.read([x for x in os.listdir(".") if x.endswith(".txt")])
 ```
 
 `just.write` a file like:

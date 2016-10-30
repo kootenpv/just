@@ -35,3 +35,14 @@ def get_result(m, extension, inp):
 ])
 def test_compare(m, extension, inp, expected, compare):
     assert compare(get_result(m, extension, inp), expected)
+
+
+def test_multi_read():
+    obj = ["a", "b"]
+    fnames = ["a.txt", "b.txt"]
+    just.write(obj, fnames)
+    try:
+        assert just.read(fnames) == obj
+    finally:
+        for fname in fnames:
+            os.remove(fname)
