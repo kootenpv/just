@@ -13,7 +13,7 @@ import just.csv_ as csv
 import just.pickle_ as pickle
 
 __project__ = "just"
-__version__ = "0.0.2"
+__version__ = "0.0.9"
 
 EXT_TO_MODULE = {
     "txt": txt,
