@@ -1,1 +1,1 @@
-just - This .rst is seen on pypi.
+Automatically just read and write files based on extension.

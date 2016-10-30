@@ -3,17 +3,17 @@ from setuptools import setup
 
 MAJOR_VERSION = '0'
 MINOR_VERSION = '0'
-MICRO_VERSION = '4'
+MICRO_VERSION = '0'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(name='just',
       version=VERSION,
-      description="Uses WiFi to tell you where you are",
+      description="Automatically just read and write files based on extension.",
       author='Pascal van Kooten',
       url='https://github.com/kootenpv/just',
       author_email='kootenpv@gmail.com',
       install_requires=[
-          'tox', 'pytest', 'pyyaml'
+          'pyyaml'
       ],
       entry_points={
           'console_scripts': ['just = just.__main__:main']

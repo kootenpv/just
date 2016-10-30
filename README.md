@@ -6,4 +6,12 @@
 
 ### Intro
 
-Let's try and see how this is going. Awesome, almost no delay
+`just.read` a file like:
+
+    txt = just.read("bla.txt")
+    json = just.read("bla.json")
+
+`just.write` a file like:
+
+    just.write(txt, "bla.txt")
+    just.write(json, "bla.json")
