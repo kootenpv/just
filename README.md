@@ -28,12 +28,16 @@ just.write(pkl, "myfile.pkl")
 
 ### TODO
 
+- csv should probably use the smart builtin csv Sniffer
+
 - Implement a way to handle paths, e.g.:
 
     just.read("base", "path", "myfile.txt")
 
 - Or implement a way to set a base bath for a project globally
 
-- Add optional backends like urllib, requests, bs4, lxml
+- Add streaming reader/writers, `just.iread` and `just.iwrite`
+
+- Add optional backends like urllib, requests, bs4, lxml, pandas
 
 - Add requests.get/post to return "aware" content, e.g. json/txt
