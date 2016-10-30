@@ -8,10 +8,14 @@
 
 `just.read` a file like:
 
-    txt = just.read("bla.txt")
-    json = just.read("bla.json")
+```python
+txt = just.read("bla.txt")
+json = just.read("bla.json")
+```
 
 `just.write` a file like:
 
-    just.write(txt, "bla.txt")
-    just.write(json, "bla.json")
+```python
+just.write(txt, "bla.txt")
+just.write(json, "bla.json")
+```
