@@ -1,9 +1,22 @@
+import csv
 
-def read(fn):
-    with open(fn) as f:
-        return [x.rstrip('\n').split(",") for x in f]
+def read(fn, delimiter=None, quotechar=None):
+    if delimiter is None:
+        delimiter = ','
+    if quotechar is None:
+        quotechar = '"'
+    with open(fn, 'rb') as f:
+        return [row for row in csv.reader(csvfile, delimiter=delimiter,
+                                          quotechar=quotechar)]
 
 
-def write(obj, fn):
-    with open(fn, "w") as f:
-        f.write("\n".join([",".join(x) for x in obj]))
+def write(obj, fn, delimiter=None, quotechar=None):
+    if delimiter is None:
+        delimiter = ','
+    if quotechar is None:
+        quotechar = '"'
+    with open(fn, "wb") as f:
+        writer = csv.writer(csvfile, delimiter=delimiter,
+                   quotechar=quotechar, quoting=csv.QUOTE_MINIMAL)
+        for row in obj:
+            writer.writerow(row)
