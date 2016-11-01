@@ -15,7 +15,7 @@ def write(obj, fn, delimiter=None, quotechar=None):
         delimiter = ','
     if quotechar is None:
         quotechar = '"'
-    with open(fn, "wb") as f:
+    with open(fn, "w") as f:
         writer_ = csv.writer(f, delimiter=delimiter,
                              quotechar=quotechar, quoting=csv.QUOTE_MINIMAL)
         writer_.writerows(obj)
