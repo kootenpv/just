@@ -6,7 +6,7 @@ def read(fn, delimiter=None, quotechar=None):
     if quotechar is None:
         quotechar = '"'
     with open(fn, 'rb') as f:
-        return [row for row in csv.reader(csvfile, delimiter=delimiter,
+        return [row for row in csv.reader(f, delimiter=delimiter,
                                           quotechar=quotechar)]
 
 
@@ -16,7 +16,7 @@ def write(obj, fn, delimiter=None, quotechar=None):
     if quotechar is None:
         quotechar = '"'
     with open(fn, "wb") as f:
-        writer = csv.writer(csvfile, delimiter=delimiter,
+        writer = csv.writer(f, delimiter=delimiter,
                    quotechar=quotechar, quoting=csv.QUOTE_MINIMAL)
         for row in obj:
             writer.writerow(row)
