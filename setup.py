@@ -2,7 +2,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 MAJOR_VERSION = '0'
-MINOR_VERSION = '0'
+MINOR_VERSION = '1'
 MICRO_VERSION = '9'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
@@ -13,7 +13,7 @@ setup(name='just',
       url='https://github.com/kootenpv/just',
       author_email='kootenpv@gmail.com',
       install_requires=[
-          'pyyaml'
+          'pyyaml', 'dsv'
       ],
       entry_points={
           'console_scripts': ['just = just.__main__:main']
