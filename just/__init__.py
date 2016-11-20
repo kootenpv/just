@@ -40,7 +40,8 @@ def _read(fname, no_exist):
     return EXT_TO_MODULE[ext].read(fname)
 
 
-def read(*fnargs, no_exist="Throw"):
+def read(*fnargs, **kwargs):
+    no_exist = kwargs.get("no_exist", "Throw")
     fname = fnargs[-1]
     if isinstance(fname, list):
         return [_read(join_path(*fnargs[:-1] + (fn,)), no_exist=no_exist) for fn in fname]
@@ -51,14 +52,15 @@ def read(*fnargs, no_exist="Throw"):
 def _write(obj, fname, mkdir_no_exist):
     if mkdir_no_exist:
         dname = os.path.dirname(fname)
-        if dname:
+        if dname not in set([".", "..", ""]):
             mkdir(dname)
     ext = fname.split(".")[-1]
     if ext in EXT_TO_MODULE:
         return EXT_TO_MODULE[ext].write(obj, fname)
 
 
-def write(obj, *fnargs, mkdir_no_exist=True):
+def write(obj, *fnargs, **kwargs):
+    mkdir_no_exist = kwargs.get("mkdir_no_exist", True)
     fname = fnargs[-1]
     if isinstance(fname, list):
         if not isinstance(obj, list):
