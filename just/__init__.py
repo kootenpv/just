@@ -16,7 +16,7 @@ import just.pickle_ as pickle
 from just.dir import mkdir
 
 __project__ = "just"
-__version__ = "0.1.14"
+__version__ = "0.1.15"
 
 EXT_TO_MODULE = {
     "html": txt,

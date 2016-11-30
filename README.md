@@ -26,8 +26,8 @@ pkl = just.read("myfile.pkl")
 Multi-read is also possible:
 
 ```python
-txts = just.read(["file1.txt", "file2.txt"])
-txts = just.read([x for x in os.listdir(".") if x.endswith(".txt")])
+txts = just.multi_read("file*.txt")
+jsons = just.multi_read("*.json")
 ```
 
 `just.write` a file like:
