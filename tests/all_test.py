@@ -13,7 +13,7 @@ def get_result(m, extension, inp):
         m.write(inp, fname)
         read_result = m.read(fname)
     finally:
-        os.remove(fname)
+        just.remove(fname)
     return read_result
 
 
@@ -41,9 +41,9 @@ def test_compare(m, extension, inp, expected, compare):
 def test_multi_read():
     obj = ["a", "b"]
     fnames = ["a.txt", "b.txt"]
-    just.write(obj, fnames)
+    just.multi_write(obj, fnames)
     try:
-        assert just.read(fnames) == obj
+        assert just.multi_read("*.txt") == obj
     finally:
         for fname in fnames:
             os.remove(fname)
