@@ -17,7 +17,7 @@ import just.path_ as path
 from just.dir import mkdir
 
 __project__ = "just"
-__version__ = "0.1.15"
+__version__ = "0.2.17"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -30,13 +30,8 @@ EXT_TO_MODULE = {
 }
 
 
-def make_path(filename):
-    just_path = path.get_just_path()
-    return os.path.join(just_path, os.path.expanduser(filename))
-
-
 def reader(fname, no_exist, read_func_name):
-    fname = make_path(fname)
+    fname = path.make_path(fname)
     if not os.path.isfile(fname) and no_exist != "Throw":
         return no_exist
     ext = fname.split(".")[-1] if "." in fname[-5:] else "txt"
@@ -54,7 +49,7 @@ def multi_read(star_path, no_exist="Throw"):
 
 
 def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
-    fname = make_path(fname)
+    fname = path.make_path(fname)
     if skip_if_exist and os.path.isfile(fname):
         return False
     if mkdir_no_exist:
@@ -78,7 +73,7 @@ def iread(fname, no_exist="Throw"):
 
 
 def remove(fname, no_exist="Throw"):
-    fname = make_path(fname)
+    fname = path.make_path(fname)
     if not os.path.isfile(fname) and no_exist != "Throw":
         return False
     os.remove(fname)

@@ -28,3 +28,8 @@ def get_just_path():
     just_path = just_path if just_path is not None else find_just_path()
     just_path = just_path if just_path is not None else get_likely_path()
     return just_path
+
+
+def make_path(filename):
+    just_path = get_just_path()
+    return os.path.join(just_path, os.path.expanduser(filename))

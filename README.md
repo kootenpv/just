@@ -11,16 +11,18 @@
 
 - You like a computer to figure out how to load a file based on extension.
 
+- You like sensible defaults for reading and writing.
+
 ### Intro
 
 `just.read` a file like:
 
 ```python
-txt = just.read("myfile.txt")
-json = just.read("myfile.json")
-yaml = just.read("myfile.yaml")
-csv = just.read("myfile.csv")
-pkl = just.read("myfile.pkl")
+some_txt = just.read("myfile.txt")
+some_json = just.read("myfile.json")
+some_yaml = just.read("myfile.yaml")
+some_csv = just.read("myfile.csv")
+some_pkl = just.read("myfile.pkl")
 ```
 
 Multi-read is also possible:
@@ -33,30 +35,54 @@ jsons = just.multi_read("*.json")
 `just.write` a file like:
 
 ```python
-just.write(txt, "myfile.txt")
-just.write(json, "myfile.json")
-just.write(yaml, "myfile.yaml")
-just.write(csv, "myfile.csv")
-just.write(pkl, "myfile.pkl")
+just.write(some_txt, "myfile.txt")
+just.write(some_json, "myfile.json")
+just.write(some_yaml, "myfile.yaml")
+just.write(some_csv, "myfile.csv")
+just.write(some_pkl, "myfile.pkl")
+```
+
+### More features
+
+#### Return default structure when file does not exist:
+
+```python
+data = just.read("notexisting.txt", no_exist=[])
+```
+
+Like this you can still write a for loop, as you expect this file to be filled in a second run of the script.
+
+#### Root directory
+
+The logic of finding a root file is the following:
+
+1. Environment variable `JUST_PATH`
+2. Searching upwards to a `.just` file
+3. The path where the script gets executed from
+
+The rationale is that you can refer to 'data/images' from anywhere in your project. It will be relative to the "just path".
+
+#### On write, creates paths when they don't exist
+
+```python
+data = just.write("data/txt/deep/1.png", mkdir_no_exist=True) # default
+```
+
+There's also an option to skip if the file exists, but this is not `True` by default.
+
+```python
+data = just.write("data/txt/deep/1.png", skip_if_exist=False) # default
 ```
 
 ### Install
 
-Code is under CI, works on python 2 and 3:
+Code is under CI, tested to be working on python 2.7/3.3+:
 
     pip install just
 
 ### TODO
 
-- Implement a way to handle paths, e.g.:
-
-    just.read("base", "path", "myfile.txt")
-
-- Or implement a way to set a base bath for a project globally
-
 - Add streaming reader/writers, `just.iread` and `just.iwrite`
-
-- csv should probably use the smart builtin csv Sniffer
 
 - Add optional backends like urllib, requests, bs4, lxml, pandas
 
