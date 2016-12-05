@@ -14,6 +14,8 @@ import just.yaml_ as yaml
 import just.csv_ as csv
 import just.pickle_ as pickle
 import just.path_ as path
+from just.requests import get
+from just.requests import post
 from just.dir import mkdir
 
 __project__ = "just"

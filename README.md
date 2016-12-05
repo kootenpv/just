@@ -56,8 +56,8 @@ Like this you can still write a for loop, as you expect this file to be filled i
 
 The logic of finding a root file is the following:
 
-1. Environment variable `JUST_PATH`
-2. Searching upwards to a `.just` file
+1. Environment variable `JUST_PATH`, if not set
+2. Searching upwards to a `.just` file, if not found
 3. The path where the script gets executed from
 
 The rationale is that you can refer to 'data/images' from anywhere in your project. It will be relative to the "just path".
@@ -68,7 +68,7 @@ The rationale is that you can refer to 'data/images' from anywhere in your proje
 data = just.write("data/txt/deep/1.png", mkdir_no_exist=True) # default
 ```
 
-There's also an option to skip if the file exists, but this is not `True` by default.
+There's also an option to skip writing if the file exists, but this is not `True` by default.
 
 ```python
 data = just.write("data/txt/deep/1.png", skip_if_exist=False) # default
