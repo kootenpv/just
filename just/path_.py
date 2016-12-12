@@ -7,10 +7,12 @@ def get_just_env_path():
 
 
 def find_just_path(max_depth=5):
+    base = os.path.dirname(os.path.abspath(sys.argv[0]))
     for depth in range(max_depth):
         prefix = "../" * depth
-        just_file = os.path.join(prefix, ".just")
+        just_file = os.path.join(base, prefix, ".just")
         if os.path.isfile(just_file):
+            print("just_file", os.path.abspath(os.path.dirname(just_file)))
             return os.path.abspath(os.path.dirname(just_file))
     return None
 

@@ -3,6 +3,12 @@ def read(fname):
         return f.read()
 
 
+def iread(fname):
+    with open(fname) as f:
+        for line in f:
+            yield line
+
+
 def write(obj, fname):
     with open(fname, "w") as f:
         f.write(obj)

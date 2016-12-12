@@ -19,7 +19,7 @@ from just.requests import post
 from just.dir import mkdir
 
 __project__ = "just"
-__version__ = "0.2.17"
+__version__ = "0.2.19"
 
 EXT_TO_MODULE = {
     "html": txt,
