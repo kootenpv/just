@@ -1,6 +1,5 @@
 import time
 import json
-import requests
 
 
 def retry(request_fn, max_retries, delay_between_retries, kwargs):
