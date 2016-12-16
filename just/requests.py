@@ -22,6 +22,7 @@ def retry(request_fn, max_retries, delay_between_retries, kwargs):
 
 
 def get(url, params=None, max_retries=3, delay_between_retries=3, **kwargs):
+    import requests
     kwargs['url'] = url
     kwargs['params'] = json.dumps(params) if params else ''
     result = retry(requests.get, max_retries, delay_between_retries, kwargs)
@@ -29,6 +30,7 @@ def get(url, params=None, max_retries=3, delay_between_retries=3, **kwargs):
 
 
 def post(url, params=None, data=None, max_retries=3, delay_between_retries=3, **kwargs):
+    import requests
     kwargs['url'] = url
     kwargs['params'] = json.dumps(params) if params else ''
     kwargs['data'] = json.dumps(data) if data else ''

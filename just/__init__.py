@@ -54,7 +54,7 @@ def multi_read(star_path, no_exist="Throw"):
 
 def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
     fname = path.make_path(fname)
-    if skip_if_exist and os.path.isfile(fname):
+    if skip_if_exist and os.path.isfile(fname):  # pragma: no cover
         return False
     if mkdir_no_exist:
         dname = os.path.dirname(fname)
@@ -66,7 +66,7 @@ def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
 
 
 def multi_write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
-    if not isinstance(fname, list) or not isinstance(obj, list):
+    if not isinstance(fname, list) or not isinstance(obj, list):  # pragma: no cover
         raise NotImplementedError("Only list of fnames + list of objects supported.")
     return [write(o, fn, mkdir_no_exist, skip_if_exist)
             for o, fn in zip(obj, fname)]

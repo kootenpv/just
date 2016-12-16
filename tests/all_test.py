@@ -1,8 +1,10 @@
 """ Our tests are defined in here """
 import os
+import sys
 from operator import eq
 import just
 import pytest
+
 
 TEST_FNAME = "testobj"
 
@@ -70,6 +72,16 @@ def test_newl_iread():
         os.remove(fname)
 
 
+def test_txt_iread():
+    fname = "testobj.txt"
+    obj = "12345"
+    just.write(obj, "testobj.txt")
+    try:
+        assert [x for x in just.iread(fname)] == [x for x in obj]
+    finally:
+        os.remove(fname)
+
+
 def test_csv_iread_error():
     fname = "testobj.csv"
     obj = [['"a"', '"b"']] + [['"1"', '"2"', '"']] * 100
@@ -93,3 +105,14 @@ def test_csv_iread_problem_lines():
         assert True
     finally:
         os.remove(fname)
+
+
+def test_find_just_path():
+    try:
+        base = os.path.dirname(os.path.abspath(sys.argv[0]))
+        just_file = os.path.join(base, ".just")
+        with open(just_file, "w") as f:
+            pass
+        assert isinstance(just.path_.find_just_path(), type("1"))
+    finally:
+        os.remove(just_file)
