@@ -10,6 +10,7 @@ import os
 import glob
 import just.txt as txt
 import just.json_ as json
+import just.newl as newl
 import just.yaml_ as yaml
 import just.csv_ as csv
 import just.pickle_ as pickle
@@ -19,11 +20,12 @@ from just.requests import post
 from just.dir import mkdir
 
 __project__ = "just"
-__version__ = "0.2.20"
+__version__ = "0.2.21"
 
 EXT_TO_MODULE = {
     "html": txt,
     "txt": txt,
+    "newl": newl,
     "json": json,
     "yaml": yaml,
     "csv": csv,

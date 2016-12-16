@@ -22,6 +22,7 @@ def get_result(m, extension, inp):
     (just.txt, "txt", "{}", "{}", eq),
     (just.txt, "txt", "None", "None", eq),
     (just.txt, "txt", "", "", eq),
+    (just.newl, "newl", ["1", "2"], ["1", "2"], eq),
     (just.json, "json", {}, {}, eq),
     (just.json, "json", None, None, eq),
     (just.json, "json", "", "", eq),
@@ -53,6 +54,16 @@ def test_csv_iread():
     fname = "testobj.csv"
     obj = [['"a"', '"b"']] + [['"1"', '"2"']] * 99
     just.write(obj, "testobj.csv")
+    try:
+        assert [x for x in just.iread(fname)] == [x for x in obj]
+    finally:
+        os.remove(fname)
+
+
+def test_newl_iread():
+    fname = "testobj.newl"
+    obj = ["1", "2"]
+    just.write(obj, "testobj.newl")
     try:
         assert [x for x in just.iread(fname)] == [x for x in obj]
     finally:
