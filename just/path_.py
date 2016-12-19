@@ -6,8 +6,9 @@ def get_just_env_path():
     return os.environ.get("JUST_PATH")
 
 
-def find_just_path(max_depth=5):
-    base = os.path.dirname(os.path.abspath(sys.argv[0]))
+def find_just_path(base=None, max_depth=5):
+    if base is None:
+        base = os.path.dirname(os.path.abspath(sys.argv[0]))
     for depth in range(max_depth):
         prefix = "../" * depth
         just_file = os.path.join(base, prefix, ".just")
@@ -28,6 +29,7 @@ def get_likely_path():
 def get_just_path():
     just_path = get_just_env_path()
     just_path = just_path if just_path is not None else find_just_path()
+    just_path = just_path if just_path is not None else find_just_path(".")
     just_path = just_path if just_path is not None else get_likely_path()
     return just_path
 
