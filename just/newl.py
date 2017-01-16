@@ -1,12 +1,13 @@
 def read(fname):
     with open(fname) as f:
-        return f.read().split("\n")
+        return [x for x in f.read().split("\n") if x]
 
 
 def iread(fname):
     with open(fname) as f:
         for line in f:
-            yield line.strip()
+            if line:
+                yield line.strip()
 
 
 def write(obj, fname):
