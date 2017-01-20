@@ -76,6 +76,12 @@ There's also an option to skip writing if the file exists, but this is not `True
 data = just.write("data/txt/deep/1.png", skip_if_exist=False) # default
 ```
 
+#### Use glob
+
+    from just import glob
+    glob("**.txt")
+    # lists filesnames
+
 ### Install
 
 Code is under CI, tested to be working on python 2.7/3.3+:

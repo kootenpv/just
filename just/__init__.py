@@ -7,7 +7,7 @@ just.print_version
 """
 
 import os
-import glob
+from glob import glob
 import just.txt as txt
 import just.json_ as json
 import just.newl as newl
@@ -20,7 +20,7 @@ from just.requests import post
 from just.dir import mkdir
 
 __project__ = "just"
-__version__ = "0.2.25"
+__version__ = "0.2.26"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -50,7 +50,7 @@ def read(fname, no_exist="Throw"):
 
 
 def multi_read(star_path, no_exist="Throw"):
-    return {x: read(x, no_exist) for x in glob.glob(os.path.expanduser(star_path))}
+    return {x: read(x, no_exist) for x in glob(os.path.expanduser(star_path))}
 
 
 def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
