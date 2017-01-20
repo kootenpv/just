@@ -46,7 +46,9 @@ def test_multi_read():
     fnames = ["a.txt", "b.txt"]
     just.multi_write(obj, fnames)
     try:
-        assert just.multi_read("*.txt") == obj
+        multi_content = just.multi_read("*.txt")
+        for o, f in zip(obj, fnames):
+            assert multi_content[f] == o
     finally:
         for fname in fnames:
             os.remove(fname)

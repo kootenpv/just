@@ -32,6 +32,8 @@ txts = just.multi_read("file*.txt")
 jsons = just.multi_read("*.json")
 ```
 
+**Multi-read is different as of 0.2.25, it now returns a dictionary instead of list; {"file.txt": "file_contents"}**
+
 `just.write` a file like:
 
 ```python

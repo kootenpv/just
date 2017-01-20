@@ -20,7 +20,7 @@ from just.requests import post
 from just.dir import mkdir
 
 __project__ = "just"
-__version__ = "0.2.24"
+__version__ = "0.2.25"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -50,7 +50,7 @@ def read(fname, no_exist="Throw"):
 
 
 def multi_read(star_path, no_exist="Throw"):
-    return [read(x, no_exist) for x in glob.glob(os.path.expanduser(star_path))]
+    return {x: read(x, no_exist) for x in glob.glob(os.path.expanduser(star_path))}
 
 
 def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
