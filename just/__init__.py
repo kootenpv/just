@@ -20,7 +20,7 @@ from just.requests import post
 from just.dir import mkdir
 
 __project__ = "just"
-__version__ = "0.2.29"
+__version__ = "0.3.30"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -30,6 +30,7 @@ EXT_TO_MODULE = {
     "json": json,
     "yaml": yaml,
     "csv": csv,
+    "tsv": csv,
     "pickle": pickle,
     "pkl": pickle,
 }
