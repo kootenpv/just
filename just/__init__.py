@@ -7,7 +7,7 @@ just.print_version
 """
 
 import os
-from glob import glob
+
 import just.txt as txt
 import just.json_ as json
 import just.newl as newl
@@ -19,8 +19,10 @@ from just.requests import get
 from just.requests import post
 from just.dir import mkdir
 
+from glob2 import glob
+
 __project__ = "just"
-__version__ = "0.3.30"
+__version__ = "0.3.31"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -36,9 +38,14 @@ EXT_TO_MODULE = {
 }
 
 
+class Throw():
+    """ This class exists to not confuse modules, while still allowing None """
+    pass
+
+
 def reader(fname, no_exist, read_func_name):
     fname = path.make_path(fname)
-    if not os.path.isfile(fname) and no_exist != "Throw":
+    if not os.path.isfile(fname) and not isinstance(no_exist, Throw):
         return no_exist
     ext = fname.split(".")[-1] if "." in fname[-5:] else "txt"
     reader_module = EXT_TO_MODULE[ext]
@@ -46,13 +53,12 @@ def reader(fname, no_exist, read_func_name):
     return read_fn(fname)
 
 
-def read(fname, no_exist="Throw"):
+def read(fname, no_exist=Throw):
     return reader(fname, no_exist, "read")
 
 
-def multi_read(star_path, no_exist="Throw", recursive=True):
-    return {x: read(x, no_exist) for x in glob(os.path.expanduser(star_path),
-                                               recursive=recursive)}
+def multi_read(star_path, no_exist=Throw):
+    return {x: read(x, no_exist) for x in glob(os.path.expanduser(star_path))}
 
 
 def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
@@ -75,13 +81,13 @@ def multi_write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
             for o, fn in zip(obj, fname)]
 
 
-def iread(fname, no_exist="Throw"):
+def iread(fname, no_exist=Throw):
     return reader(fname, no_exist, "iread")
 
 
-def remove(fname, no_exist="Throw"):
+def remove(fname, no_exist=Throw):
     fname = path.make_path(fname)
-    if not os.path.isfile(fname) and no_exist != "Throw":
+    if not os.path.isfile(fname) and not isinstance(no_exist, Throw):
         return False
     os.remove(fname)
     return True

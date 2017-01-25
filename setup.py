@@ -2,8 +2,8 @@ from setuptools import find_packages
 from setuptools import setup
 
 MAJOR_VERSION = '0'
-MINOR_VERSION = '3'
-MICRO_VERSION = '30'
+MINOR_VERSION = '4'
+MICRO_VERSION = '31'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(name='just',
@@ -13,7 +13,7 @@ setup(name='just',
       url='https://github.com/kootenpv/just',
       author_email='kootenpv@gmail.com',
       install_requires=[
-          'pyyaml', 'dsv'
+          'pyyaml', 'dsv', 'glob2'
       ],
       entry_points={
           'console_scripts': ['just = just.__main__:main']
