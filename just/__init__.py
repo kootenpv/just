@@ -22,7 +22,7 @@ from just.dir import mkdir
 from glob2 import glob
 
 __project__ = "just"
-__version__ = "0.3.31"
+__version__ = "0.4.32"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -31,6 +31,7 @@ EXT_TO_MODULE = {
     "newl": newl,
     "json": json,
     "yaml": yaml,
+    "yml": yaml,
     "csv": csv,
     "tsv": csv,
     "pickle": pickle,
