@@ -14,7 +14,7 @@ import just.newl as newl
 import just.yaml_ as yaml
 import just.csv_ as csv
 import just.pickle_ as pickle
-import just.path_ as path
+from just.path_ import make_path
 from just.requests import get
 from just.requests import post
 from just.dir import mkdir
@@ -22,7 +22,7 @@ from just.dir import mkdir
 from glob2 import glob
 
 __project__ = "just"
-__version__ = "0.4.32"
+__version__ = "0.4.33"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -45,7 +45,7 @@ class Throw():
 
 
 def reader(fname, no_exist, read_func_name):
-    fname = path.make_path(fname)
+    fname = make_path(fname)
     if not os.path.isfile(fname) and not isinstance(no_exist, Throw):
         return no_exist
     ext = fname.split(".")[-1] if "." in fname[-5:] else "txt"
@@ -63,7 +63,7 @@ def multi_read(star_path, no_exist=Throw):
 
 
 def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
-    fname = path.make_path(fname)
+    fname = make_path(fname)
     if skip_if_exist and os.path.isfile(fname):  # pragma: no cover
         return False
     if mkdir_no_exist:
@@ -87,7 +87,7 @@ def iread(fname, no_exist=Throw):
 
 
 def remove(fname, no_exist=Throw):
-    fname = path.make_path(fname)
+    fname = make_path(fname)
     if not os.path.isfile(fname) and not isinstance(no_exist, Throw):
         return False
     os.remove(fname)
