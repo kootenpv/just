@@ -8,4 +8,4 @@ def read(fn):
 def write(obj, fn):
     import json
     with open(fn, "w") as f:
-        json.dump(obj, f)
+        json.dump(obj, f, indent=4)
