@@ -22,7 +22,7 @@ from just.dir import mkdir
 from glob2 import glob
 
 __project__ = "just"
-__version__ = "0.4.34"
+__version__ = "0.4.35"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -39,14 +39,9 @@ EXT_TO_MODULE = {
 }
 
 
-class Throw():
-    """ This class exists to not confuse modules, while still allowing None """
-    pass
-
-
 def reader(fname, no_exist, read_func_name):
     fname = make_path(fname)
-    if not os.path.isfile(fname) and not isinstance(no_exist, Throw):
+    if not os.path.isfile(fname) and no_exist is not None:
         return no_exist
     ext = fname.split(".")[-1] if "." in fname[-5:] else "txt"
     reader_module = EXT_TO_MODULE[ext]
@@ -54,11 +49,11 @@ def reader(fname, no_exist, read_func_name):
     return read_fn(fname)
 
 
-def read(fname, no_exist=Throw):
+def read(fname, no_exist=None):
     return reader(fname, no_exist, "read")
 
 
-def multi_read(star_path, no_exist=Throw):
+def multi_read(star_path, no_exist=None):
     return {x: read(x, no_exist) for x in glob(os.path.expanduser(star_path))}
 
 
@@ -82,13 +77,13 @@ def multi_write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
             for o, fn in zip(obj, fname)]
 
 
-def iread(fname, no_exist=Throw):
+def iread(fname, no_exist=None):
     return reader(fname, no_exist, "iread")
 
 
-def remove(fname, no_exist=Throw):
+def remove(fname, no_exist=None):
     fname = make_path(fname)
-    if not os.path.isfile(fname) and not isinstance(no_exist, Throw):
+    if not os.path.isfile(fname) and no_exist is not None:
         return False
     os.remove(fname)
     return True
