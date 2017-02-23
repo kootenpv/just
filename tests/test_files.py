@@ -114,7 +114,15 @@ def test_find_just_path():
         base = os.path.dirname(os.path.abspath(sys.argv[0]))
         just_file = os.path.join(base, ".just")
         with open(just_file, "w") as f:
-            pass
+            f.write("OK")
         assert isinstance(just.path_.find_just_path(), type("1"))
     finally:
         os.remove(just_file)
+
+
+def test_unsuccesful_read():
+    assert just.read("A" * 100, 42) == 42
+
+
+def test_unsuccesful_remove():
+    assert not just.remove("A" * 100, 42)
