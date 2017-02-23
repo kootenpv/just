@@ -3,15 +3,15 @@ import json
 
 
 def retry(request_fn, max_retries, delay_between_retries, kwargs):
-    import requests
+    from requests import RequestException
     tries = 0
     while tries < max_retries:
         try:
             r = request_fn(**kwargs)
             break
-        except requests.exceptions.RequestException as e:
+        except RequestException as e:
             tries += 1
-            print("just.requests", kwargs["url"], "attempt", tries, str(e))
+            print("just.requests_", kwargs["url"], "attempt", tries, str(e))
             if tries == max_retries:
                 return ""
             time.sleep(delay_between_retries)

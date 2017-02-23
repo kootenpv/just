@@ -15,8 +15,8 @@ import just.yaml_ as yaml
 import just.csv_ as csv
 import just.pickle_ as pickle
 from just.path_ import make_path
-from just.requests import get
-from just.requests import post
+from just.requests_ import get
+from just.requests_ import post
 from just.dir import mkdir
 
 from glob2 import glob
