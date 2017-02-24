@@ -22,7 +22,7 @@ from just.dir import mkdir
 from glob2 import glob
 
 __project__ = "just"
-__version__ = "0.4.40"
+__version__ = "0.4.41"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -44,7 +44,7 @@ def reader(fname, no_exist, read_func_name):
     fname = make_path(fname)
     if not os.path.isfile(fname) and no_exist is not None:
         return no_exist
-    ext = fname.split(".")[-1] if "." in fname[-5:] else "txt"
+    ext = fname.split(".")[-1] if "." in fname[-6:] else "txt"
     reader_module = EXT_TO_MODULE[ext]
     read_fn = getattr(reader_module, read_func_name)
     return read_fn(fname)
@@ -66,7 +66,7 @@ def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name):
         dname = os.path.dirname(fname)
         if dname not in set([".", "..", ""]):
             mkdir(dname)
-    ext = fname.split(".")[-1] if "." in fname[-5:] else "txt"
+    ext = fname.split(".")[-1] if "." in fname[-6:] else "txt"
     writer_module = EXT_TO_MODULE[ext]
     write_fn = getattr(writer_module, write_func_name)
     return write_fn(obj, fname)
