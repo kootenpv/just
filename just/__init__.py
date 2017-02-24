@@ -22,7 +22,7 @@ from just.dir import mkdir
 from glob2 import glob
 
 __project__ = "just"
-__version__ = "0.4.39"
+__version__ = "0.4.40"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -58,7 +58,7 @@ def multi_read(star_path, no_exist=None):
     return {x: read(x, no_exist) for x in glob(os.path.expanduser(star_path))}
 
 
-def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
+def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name):
     fname = make_path(fname)
     if skip_if_exist and os.path.isfile(fname):  # pragma: no cover
         return False
@@ -66,9 +66,14 @@ def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
         dname = os.path.dirname(fname)
         if dname not in set([".", "..", ""]):
             mkdir(dname)
-    ext = fname.split(".")[-1]
-    if ext in EXT_TO_MODULE:
-        return EXT_TO_MODULE[ext].write(obj, fname)
+    ext = fname.split(".")[-1] if "." in fname[-5:] else "txt"
+    writer_module = EXT_TO_MODULE[ext]
+    write_fn = getattr(writer_module, write_func_name)
+    return write_fn(obj, fname)
+
+
+def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
+    return writer(obj, fname, mkdir_no_exist, skip_if_exist, "write")
 
 
 def multi_write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
@@ -80,6 +85,10 @@ def multi_write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
 
 def iread(fname, no_exist=None):
     return reader(fname, no_exist, "iread")
+
+
+def iwrite(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
+    return writer(obj, fname, mkdir_no_exist, skip_if_exist, "iwrite")
 
 
 def remove(fname, no_exist=None):
