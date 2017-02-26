@@ -15,14 +15,14 @@ import just.yaml_ as yaml
 import just.csv_ as csv
 import just.pickle_ as pickle
 from just.path_ import make_path
+from just.path_ import glob
 from just.requests_ import get
 from just.requests_ import post
 from just.dir import mkdir
 
-from glob2 import glob
 
 __project__ = "just"
-__version__ = "0.4.41"
+__version__ = "0.4.42"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -55,7 +55,7 @@ def read(fname, no_exist=None):
 
 
 def multi_read(star_path, no_exist=None):
-    return {x: read(x, no_exist) for x in glob(os.path.expanduser(star_path))}
+    return {x: read(x, no_exist) for x in glob(star_path)}
 
 
 def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name):

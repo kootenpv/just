@@ -1,5 +1,10 @@
 import sys
 import os
+import glob2
+
+
+def glob(path):
+    return glob2.glob(os.path.expanduser(path))
 
 
 def get_just_env_path():
