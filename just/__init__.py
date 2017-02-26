@@ -22,7 +22,7 @@ from just.dir import mkdir
 
 
 __project__ = "just"
-__version__ = "0.4.42"
+__version__ = "0.4.43"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -40,22 +40,24 @@ EXT_TO_MODULE = {
 }
 
 
-def reader(fname, no_exist, read_func_name):
+def reader(fname, no_exist, read_func_name, fallback_type):
     fname = make_path(fname)
     if not os.path.isfile(fname) and no_exist is not None:
         return no_exist
     ext = fname.split(".")[-1] if "." in fname[-6:] else "txt"
-    reader_module = EXT_TO_MODULE[ext]
+    if ext not in EXT_TO_MODULE and fallback_type == "RAISE":
+        raise TypeError("just does not yet cover '{}'".format(ext))
+    reader_module = EXT_TO_MODULE.get(ext, None) or EXT_TO_MODULE[fallback_type]
     read_fn = getattr(reader_module, read_func_name)
     return read_fn(fname)
 
 
-def read(fname, no_exist=None):
-    return reader(fname, no_exist, "read")
+def read(fname, no_exist=None, fallback_type="RAISE"):
+    return reader(fname, no_exist, "read", fallback_type)
 
 
-def multi_read(star_path, no_exist=None):
-    return {x: read(x, no_exist) for x in glob(star_path)}
+def multi_read(star_path, no_exist=None, fallback_type="RAISE"):
+    return {x: read(x, no_exist, fallback_type) for x in glob(star_path)}
 
 
 def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name):
@@ -83,8 +85,8 @@ def multi_write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
             for o, fn in zip(obj, fname)]
 
 
-def iread(fname, no_exist=None):
-    return reader(fname, no_exist, "iread")
+def iread(fname, no_exist=None, fallback_type="RAISE"):
+    return reader(fname, no_exist, "iread", fallback_type)
 
 
 def iwrite(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
@@ -96,4 +98,12 @@ def remove(fname, no_exist=None):
     if not os.path.isfile(fname) and no_exist is not None:
         return False
     os.remove(fname)
+    return True
+
+
+def rename(fname, extension, no_exist=None):
+    fname = make_path(fname)
+    if not os.path.isfile(fname) and no_exist is not None:
+        return False
+    os.rename(fname, fname + "." + extension)
     return True
