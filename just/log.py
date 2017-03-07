@@ -1,9 +1,9 @@
-from just.json_ import append
 import time
+from just.json_ import append
 
 START = "_".join(time.asctime().split())
 
-LOG_FILE = "logs/{}_{}".format(__file__, START)
+LOG_FILE = "logs/{}_{}".format(__name__, START)
 
 
 def log(obj, *tags):
