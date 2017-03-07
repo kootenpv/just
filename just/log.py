@@ -9,8 +9,6 @@ LOG_BASE = "logs"
 LOG_FILE = "{}/{}_{}.jsonl".format(LOG_BASE, NAME, START)
 LOG_LINK = "{}/{}.jsonl".format(LOG_BASE, NAME)
 
-os.symlink(just.make_path(LOG_FILE), just.make_path(LOG_LINK))
-
 
 def log(obj, *tags):
     just.append({"tags": tags, "object": obj}, LOG_FILE)
