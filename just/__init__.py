@@ -22,7 +22,7 @@ from just.dir import mkdir
 
 
 __project__ = "just"
-__version__ = "0.4.45"
+__version__ = "0.5.46"
 
 EXT_TO_MODULE = {
     "html": txt,
