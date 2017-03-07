@@ -19,10 +19,11 @@ from just.path_ import glob
 from just.requests_ import get
 from just.requests_ import post
 from just.dir import mkdir
+from just.log import log
 
 
 __project__ = "just"
-__version__ = "0.5.46"
+__version__ = "0.5.48"
 
 EXT_TO_MODULE = {
     "html": txt,
