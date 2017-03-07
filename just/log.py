@@ -4,7 +4,7 @@ import sys
 
 START = "_".join(time.asctime().split())
 
-LOG_FILE = "logs/{}_{}".format(sys.argv[1].rstrip(".py"), START)
+LOG_FILE = "logs/{}_{}".format(sys.argv[0].rstrip(".py"), START)
 
 
 def log(obj, *tags):
