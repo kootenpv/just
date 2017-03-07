@@ -1,0 +1,4 @@
+retrying
+requests
+pyyaml
+requests_mock

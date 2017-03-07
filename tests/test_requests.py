@@ -25,4 +25,4 @@ def test_requests(method, output, content_type):
 
 
 def test_retry():
-    assert just.get(NOT_EXISTING_URL, max_retries=2, delay_between_retries=0.01) == ""
+    assert just.get(NOT_EXISTING_URL) == ""
