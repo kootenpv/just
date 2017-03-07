@@ -22,7 +22,7 @@ from just.dir import mkdir
 
 
 __project__ = "just"
-__version__ = "0.4.43"
+__version__ = "0.4.44"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -76,6 +76,12 @@ def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name):
 
 def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
     return writer(obj, fname, mkdir_no_exist, skip_if_exist, "write")
+
+# only supported for JSON Lines so far.
+
+
+def append(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
+    return writer(obj, fname, mkdir_no_exist, skip_if_exist, "append")
 
 
 def multi_write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):

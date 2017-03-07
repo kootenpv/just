@@ -8,6 +8,11 @@ def read(fn):
         return json.load(f)
 
 
+def append(obj, fn):
+    with open(fn, "w") as f:
+        json.dump(obj, f, indent=4)
+
+
 def write(obj, fn):
     with open(fn, "w") as f:
         json.dump(obj, f, indent=4)
