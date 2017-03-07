@@ -2,7 +2,7 @@ import time
 import sys
 import just
 
-START = "_".join(time.asctime().split())
+START = "_".join(time.asctime().replace(":", "_").split())
 
 LOG_FILE = "logs/{}_{}.jsonl".format(sys.argv[0].rstrip(".py"), START)
 
