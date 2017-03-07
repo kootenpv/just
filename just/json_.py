@@ -10,7 +10,7 @@ def read(fn):
 
 def append(obj, fn):
     with open(fn, "a") as f:
-        f.write(json.dumps(obj, indent=4) + "\n")
+        f.write(json.dumps(obj) + "\n")
 
 
 def write(obj, fn):
