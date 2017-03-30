@@ -6,8 +6,7 @@ def read(fname):
 def iread(fname):
     with open(fname) as f:
         for line in f:
-            for c in line:
-                yield c
+            yield line
 
 
 def write(obj, fname):

@@ -76,10 +76,10 @@ def test_newl_iread():
 
 def test_txt_iread():
     fname = "testobj.txt"
-    obj = "12345"
+    obj = "1\n2\n3\n4\n5"
     just.write(obj, "testobj.txt")
     try:
-        assert [x for x in just.iread(fname)] == [x for x in obj]
+        assert [x.rstrip("\n") for x in just.iread(fname)] == [x for x in obj.split("\n")]
     finally:
         os.remove(fname)
 
