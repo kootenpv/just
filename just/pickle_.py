@@ -1,11 +1,11 @@
 
 def read(fn):
-    import pickle
+    import dill
     with open(fn, "rb") as f:
-        return pickle.load(f)
+        return dill.load(f)
 
 
 def write(obj, fn):
-    import pickle
+    import dill
     with open(fn, "wb") as f:
-        pickle.dump(obj, f)
+        dill.dump(obj, f)
