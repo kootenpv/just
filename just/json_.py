@@ -20,8 +20,13 @@ def write(obj, fn):
 
 def iread(fn):
     with open(fn) as f:
-        for line in f:
-            yield json.loads(line)
+        for i, line in enumerate(f):
+            try:
+                yield json.loads(line)
+            except json.decoder.JSONDecodeError as e:
+                raise json.decoder.JSONDecodeError(
+                    "JSON-L parsing error in line number {} in the jsonl file".format(i),
+                    line, e.pos)
 
 
 def iwrite(obj, fn):
