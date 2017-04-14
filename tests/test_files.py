@@ -111,7 +111,7 @@ def test_csv_iread_problem_lines():
 
 def test_find_just_path():
     try:
-        base = os.path.dirname(os.path.abspath(sys.argv[0]))
+        base = os.path.dirname(os.path.abspath(__file__))
         just_file = os.path.join(base, ".just")
         with open(just_file, "w") as f:
             f.write("OK")

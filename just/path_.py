@@ -1,4 +1,4 @@
-import sys
+import inspect
 import os
 import glob2
 
@@ -13,7 +13,7 @@ def get_just_env_path():
 
 def find_just_path(base=None, max_depth=5):
     if base is None:
-        base = os.path.dirname(os.path.abspath(sys.argv[0]))
+        base = os.path.dirname(os.path.abspath(inspect.stack()[1][1]))
     for depth in range(max_depth):
         prefix = "../" * depth
         just_file = os.path.join(base, prefix, ".just")

@@ -24,9 +24,8 @@ def iread(fn):
             try:
                 yield json.loads(line)
             except json.decoder.JSONDecodeError as e:
-                raise json.decoder.JSONDecodeError(
-                    "JSON-L parsing error in line number {} in the jsonl file".format(i),
-                    line, e.pos)
+                msg = "JSON-L parsing error in line number {} in the jsonl file".format(i)
+                raise json.decoder.JSONDecodeError(msg, line, e.pos)
 
 
 def iwrite(obj, fn):
