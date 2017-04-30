@@ -1,7 +1,7 @@
 import time
 import sys
-import just
 import inspect
+import just
 
 START = "_".join(time.asctime().replace(":", "_").split())
 NAME = sys.argv[0].rstrip(".py")
@@ -18,5 +18,6 @@ def get_file_scope():
 
 def log(obj, *tags):
     file_name, function_name = get_file_scope()
-    data = {"tags": tags, "object": obj, "file": file_name, "function": function_name}
+    data = {"tags": tags, "object": obj, "file": file_name, "function": function_name,
+            "time": time.time()}
     just.append(data, LOG_FILE)
