@@ -23,7 +23,7 @@ from just.log import log
 
 
 __project__ = "just"
-__version__ = "0.6.68"
+__version__ = "0.6.69"
 
 EXT_TO_MODULE = {
     "html": txt,

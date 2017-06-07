@@ -24,7 +24,7 @@ def retry(request_fn, max_retries, delay_base, kwargs):
     return r.text
 
 
-def get(url, params=None, max_retries=3, delay_base=3, **kwargs):
+def get(url, params=None, max_retries=5, delay_base=3, **kwargs):
     import requests
     kwargs['url'] = url
     kwargs['params'] = json.dumps(params) if params else ''
@@ -32,7 +32,7 @@ def get(url, params=None, max_retries=3, delay_base=3, **kwargs):
     return result
 
 
-def post(url, params=None, data=None, max_retries=3, delay_base=3, **kwargs):
+def post(url, params=None, data=None, max_retries=5, delay_base=3, **kwargs):
     import requests
     kwargs['url'] = url
     kwargs['params'] = json.dumps(params) if params else ''
