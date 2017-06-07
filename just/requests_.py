@@ -2,7 +2,7 @@ import time
 import json
 
 
-def retry(request_fn, max_retries, delay_base, kwargs):
+def _retry(request_fn, max_retries, delay_base, kwargs):
     from requests import RequestException
     tries = 0
     if 'headers' not in kwargs:
@@ -28,7 +28,7 @@ def get(url, params=None, max_retries=5, delay_base=3, **kwargs):
     import requests
     kwargs['url'] = url
     kwargs['params'] = json.dumps(params) if params else ''
-    result = retry(requests.get, max_retries, delay_base, kwargs)
+    result = _retry(requests.get, max_retries, delay_base, kwargs)
     return result
 
 
@@ -37,5 +37,5 @@ def post(url, params=None, data=None, max_retries=5, delay_base=3, **kwargs):
     kwargs['url'] = url
     kwargs['params'] = json.dumps(params) if params else ''
     kwargs['data'] = json.dumps(data) if data else ''
-    result = retry(requests.post, max_retries, delay_base, kwargs)
+    result = _retry(requests.post, max_retries, delay_base, kwargs)
     return result
