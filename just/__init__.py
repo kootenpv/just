@@ -23,7 +23,7 @@ from just.log import log
 
 
 __project__ = "just"
-__version__ = "0.6.73"
+__version__ = "0.6.74"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -41,14 +41,14 @@ EXT_TO_MODULE = {
 }
 
 
-def reader(fname, no_exist, read_func_name, fallback_type, ignore_exceptions):
+def reader(fname, no_exist, read_func_name, unknown_type, ignore_exceptions):
     fname = make_path(fname)
     if not os.path.isfile(fname) and no_exist is not None:
         return no_exist
     ext = fname.split(".")[-1] if "." in fname[-6:] else "txt"
-    if ext not in EXT_TO_MODULE and fallback_type == "RAISE":
+    if ext not in EXT_TO_MODULE and unknown_type == "RAISE":
         raise TypeError("just does not yet cover '{}'".format(ext))
-    reader_module = EXT_TO_MODULE.get(ext, None) or EXT_TO_MODULE[fallback_type]
+    reader_module = EXT_TO_MODULE.get(ext, None) or EXT_TO_MODULE[unknown_type]
     read_fn = getattr(reader_module, read_func_name)
     if ignore_exceptions is not None:
         try:
@@ -59,12 +59,12 @@ def reader(fname, no_exist, read_func_name, fallback_type, ignore_exceptions):
         return read_fn(fname)
 
 
-def read(fname, no_exist=None, fallback_type="RAISE", ignore_exceptions=None):
-    return reader(fname, no_exist, "read", fallback_type, ignore_exceptions)
+def read(fname, no_exist=None, unknown_type="RAISE", ignore_exceptions=None):
+    return reader(fname, no_exist, "read", unknown_type, ignore_exceptions)
 
 
-def multi_read(star_path, no_exist=None, fallback_type="RAISE", ignore_exceptions=None):
-    return {x: read(x, no_exist, fallback_type, ignore_exceptions) for x in glob(star_path)}
+def multi_read(star_path, no_exist=None, unknown_type="RAISE", ignore_exceptions=None):
+    return {x: read(x, no_exist, unknown_type, ignore_exceptions) for x in glob(star_path)}
 
 
 def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name):
@@ -98,8 +98,8 @@ def multi_write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
             for o, fn in zip(obj, fname)]
 
 
-def iread(fname, no_exist=None, fallback_type="RAISE", ignore_exceptions=None):
-    return reader(fname, no_exist, "iread", fallback_type, ignore_exceptions)
+def iread(fname, no_exist=None, unknown_type="RAISE", ignore_exceptions=None):
+    return reader(fname, no_exist, "iread", unknown_type, ignore_exceptions)
 
 
 def iwrite(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
