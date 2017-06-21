@@ -2,6 +2,8 @@ import inspect
 import os
 import glob2
 
+__cached_just_path = None
+
 
 def glob(path):
     return glob2.glob(os.path.expanduser(path))
@@ -32,10 +34,14 @@ def get_likely_path():
 
 
 def get_just_path():
+    global __cached_just_path
+    if __cached_just_path is not None:
+        return __cached_just_path
     just_path = get_just_env_path()
     just_path = just_path if just_path is not None else find_just_path()
     just_path = just_path if just_path is not None else find_just_path(".")
     just_path = just_path if just_path is not None else get_likely_path()
+    __cached_just_path = just_path
     return just_path
 
 
