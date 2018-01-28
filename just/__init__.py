@@ -8,6 +8,7 @@ just.print_version
 
 import os
 
+import shutil
 import just.txt as txt
 import just.json_ as json
 import just.newl as newl
@@ -23,7 +24,7 @@ from just.log import log
 
 
 __project__ = "just"
-__version__ = "0.6.74"
+__version__ = "0.6.75"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -106,12 +107,21 @@ def iwrite(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
     return writer(obj, fname, mkdir_no_exist, skip_if_exist, "iwrite")
 
 
-def remove(fname, no_exist=None):
-    fname = make_path(fname)
-    if not os.path.isfile(fname) and no_exist is not None:
-        return False
-    os.remove(fname)
-    return True
+def remove(file_path, no_exist=False, recursive=False):
+    file_path = make_path(file_path)
+    if os.path.isfile(file_path):
+        os.remove(file_path)
+        return True
+    if os.path.isdir(file_path):
+        if recursive:
+            shutil.rmtree(file_path)
+            return True
+        else:
+            raise IOError("Cannot remove directory unless recursive=True")
+    # if there is a default value, return that if no file/dir found when attempting to remove
+    if no_exist is not None:
+        return no_exist
+    raise IOError("File '{}' does not exist.".format(file_path))
 
 
 def rename(fname, extension, no_exist=None):

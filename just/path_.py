@@ -6,7 +6,7 @@ __cached_just_path = None
 
 
 def glob(path):
-    return glob2.glob(os.path.expanduser(path))
+    return glob2.glob(make_path(path))
 
 
 def get_just_env_path():
