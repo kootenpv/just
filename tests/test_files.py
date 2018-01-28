@@ -46,9 +46,10 @@ def test_multi_read():
     fnames = ["a.txt", "b.txt"]
     just.multi_write(obj, fnames)
     try:
+        full_names = just.glob("*.txt")
         multi_content = just.multi_read("*.txt")
         for o, f in zip(obj, fnames):
-            full_name = [x for x in fnames if x.endswith(f)][0]
+            full_name = [x for x in full_names if x.endswith(f)][0]
             assert multi_content[full_name] == o
     finally:
         for fname in fnames:
@@ -126,4 +127,4 @@ def test_unsuccesful_read():
 
 
 def test_unsuccesful_remove():
-    assert not just.remove("A" * 100, 42)
+    assert just.remove("A" * 100, 42) == 42
