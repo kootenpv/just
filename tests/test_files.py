@@ -48,7 +48,8 @@ def test_multi_read():
     try:
         multi_content = just.multi_read("*.txt")
         for o, f in zip(obj, fnames):
-            assert multi_content[f] == o
+            full_name = [x for x in fnames if x.endswith(f)][0]
+            assert multi_content[full_name] == o
     finally:
         for fname in fnames:
             os.remove(fname)
