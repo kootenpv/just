@@ -11,7 +11,9 @@ def _retry(request_fn, max_retries, delay_base, raw, kwargs):
         kwargs["headers"]['User-Agent'] = 'Just Agent 1.0'
     while tries < max_retries:
         try:
-            r = request_fn(**kwargs)
+            r = request_fn(**kwargs, timeout=delay_base)
+            if r.status_code > 399:
+                return None
             break
         except RequestException as e:
             tries += 1
