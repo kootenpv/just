@@ -28,7 +28,7 @@ def _retry(request_fn, max_retries, delay_base, raw, kwargs):
     return r.text
 
 
-def get(url, params=None, max_retries=5, delay_base=3, raw=False, **kwargs):
+def get(url, params=None, max_retries=1, delay_base=3, raw=False, **kwargs):
     import requests
     kwargs['url'] = url
     kwargs['params'] = json.dumps(params) if params else ''

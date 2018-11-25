@@ -21,10 +21,10 @@ from just.requests_ import get
 from just.requests_ import post
 from just.dir import mkdir
 from just.log import log
-
+from just.jpath import json_extract
 
 __project__ = "just"
-__version__ = "0.6.76"
+__version__ = "0.6.79"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -85,6 +85,7 @@ def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name):
 def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
     return writer(obj, fname, mkdir_no_exist, skip_if_exist, "write")
 
+
 # only supported for JSON Lines so far.
 
 
@@ -95,8 +96,7 @@ def append(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
 def multi_write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
     if not isinstance(fname, list) or not isinstance(obj, list):  # pragma: no cover
         raise NotImplementedError("Only list of fnames + list of objects supported.")
-    return [write(o, fn, mkdir_no_exist, skip_if_exist)
-            for o, fn in zip(obj, fname)]
+    return [write(o, fn, mkdir_no_exist, skip_if_exist) for o, fn in zip(obj, fname)]
 
 
 def iread(fname, no_exist=None, unknown_type="RAISE", ignore_exceptions=None):
@@ -130,3 +130,9 @@ def rename(fname, extension, no_exist=None):
         return False
     os.rename(fname, fname + "." + extension)
     return True
+
+
+def jpath(fname_or_dc, jsonpath_expression):
+    if isinstance(fname_or_dc, str):
+        fname_or_dc = read(fname_or_dc)
+    return json_extract(fname_or_dc, jsonpath_expression)

@@ -27,4 +27,4 @@ with open('just/__init__.py', 'w') as f:
                '__version__ = "{}"'.format(version), init))
 
 py_version = "python3.5" if sh.which("python3.5") is not None else "python"
-os.system('{} setup.py sdist bdist_wheel upload'.format(py_version))
+os.system('{} setup.py sdist upload'.format(py_version))
