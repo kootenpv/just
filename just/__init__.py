@@ -24,7 +24,7 @@ from just.log import log
 from just.jpath import json_extract
 
 __project__ = "just"
-__version__ = "0.6.81"
+__version__ = "0.6.84"
 
 EXT_TO_MODULE = {
     "html": txt,
