@@ -4,6 +4,7 @@ import json
 
 def _retry(request_fn, max_retries, delay_base, raw, kwargs):
     from requests import RequestException
+
     tries = 0
     if 'headers' not in kwargs:
         kwargs["headers"] = {}
@@ -11,7 +12,7 @@ def _retry(request_fn, max_retries, delay_base, raw, kwargs):
         kwargs["headers"]['User-Agent'] = 'Just Agent 1.0'
     while tries < max_retries:
         try:
-            r = request_fn(**kwargs, timeout=delay_base)
+            r = request_fn(timeout=delay_base, **kwargs)
             if r.status_code > 399:
                 return None
             break
@@ -30,6 +31,7 @@ def _retry(request_fn, max_retries, delay_base, raw, kwargs):
 
 def get(url, params=None, max_retries=1, delay_base=3, raw=False, **kwargs):
     import requests
+
     kwargs['url'] = url
     kwargs['params'] = json.dumps(params) if params else ''
     result = _retry(requests.get, max_retries, delay_base, raw, kwargs)
@@ -38,6 +40,7 @@ def get(url, params=None, max_retries=1, delay_base=3, raw=False, **kwargs):
 
 def post(url, params=None, data=None, max_retries=5, raw=False, delay_base=3, **kwargs):
     import requests
+
     kwargs['url'] = url
     kwargs['params'] = json.dumps(params) if params else ''
     kwargs['data'] = json.dumps(data) if data else ''
