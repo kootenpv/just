@@ -7,7 +7,7 @@ just.print_version
 """
 
 import os
-
+import gzip
 import shutil
 import just.txt as txt
 import just.json_ as json
@@ -46,6 +46,10 @@ def reader(fname, no_exist, read_func_name, unknown_type, ignore_exceptions):
     fname = make_path(fname)
     if not os.path.isfile(fname) and no_exist is not None:
         return no_exist
+    gzname = False
+    if fname.endswith(".gz"):
+        gzname = fname
+        fname = fname[:-3]
     ext = fname.split(".")[-1] if "." in fname[-6:] else "txt"
     if ext not in EXT_TO_MODULE and unknown_type == "RAISE":
         raise TypeError("just does not yet cover '{}'".format(ext))
@@ -53,11 +57,21 @@ def reader(fname, no_exist, read_func_name, unknown_type, ignore_exceptions):
     read_fn = getattr(reader_module, read_func_name)
     if ignore_exceptions is not None:
         try:
-            return read_fn(fname)
+            if gzname:
+                # actually returns a file handler >.<
+                with gzip.GzipFile(gzname, "rb") as f:
+                    return read_fn(f)
+            else:
+                return read_fn(fname)
         except ignore_exceptions:
             return None
     else:
-        return read_fn(fname)
+        if gzname:
+            # actually returns a file handler >.<
+            with gzip.GzipFile(gzname, "rb") as f:
+                return read_fn(f)
+        else:
+            return read_fn(fname)
 
 
 def read(fname, no_exist=None, unknown_type="RAISE", ignore_exceptions=None):

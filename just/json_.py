@@ -1,3 +1,6 @@
+import warnings
+import gzip
+
 try:
     import ujson as json
 except ImportError:
@@ -5,23 +8,33 @@ except ImportError:
 
 
 def read(fn):
+    if isinstance(fn, gzip.GzipFile):
+        return json.load(fn)
     if fn.endswith(".jsonl"):
-        raise TypeError("JSON Newline format can only be read by iread")
+        warnings.warn("Reading streaming format at once.")
+        return list(iread(fn))
     with open(fn) as f:
         return json.load(f)
 
 
 def append(obj, fn):
+    if isinstance(fn, gzip.GzipFile):
+        raise TypeError("Cannot append to gzip")
     with open(fn, "a+") as f:
         f.write(json.dumps(obj) + "\n")
 
 
 def write(obj, fn):
-    with open(fn, "w") as f:
-        json.dump(obj, f, indent=4)
+    if isinstance(fn, gzip.GzipFile):
+        json.dump(obj, fn)
+    else:
+        with open(fn, "w") as f:
+            json.dump(obj, f, indent=4)
 
 
 def iread(fn):
+    if isinstance(fn, gzip.GzipFile):
+        raise TypeError("Cannot iteratively read gzip")
     with open(fn) as f:
         for i, line in enumerate(f):
             try:
@@ -32,6 +45,8 @@ def iread(fn):
 
 
 def iwrite(obj, fn):
+    if isinstance(fn, gzip.GzipFile):
+        raise TypeError("Cannot iteratively write gzip")
     with open(fn, "w") as f:
         for chunk in obj:
             f.write(json.dumps(chunk) + "\n")
