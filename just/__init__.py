@@ -24,7 +24,7 @@ from just.log import log
 from just.jpath import json_extract
 
 __project__ = "just"
-__version__ = "0.6.84"
+__version__ = "0.6.86"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -90,10 +90,19 @@ def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name):
         dname = os.path.dirname(fname)
         if dname not in set([".", "..", ""]):
             mkdir(dname)
+    gzname = False
+    if fname.endswith(".gz"):
+        gzname = fname
+        fname = fname[:-3]
     ext = fname.split(".")[-1] if "." in fname[-6:] else "txt"
     writer_module = EXT_TO_MODULE[ext]
     write_fn = getattr(writer_module, write_func_name)
-    return write_fn(obj, fname)
+    if gzname:
+        # actually returns a file handler >.<
+        with gzip.GzipFile(gzname, "w") as f:
+            return write_fn(obj, f)
+    else:
+        return write_fn(obj, fname)
 
 
 def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
@@ -136,6 +145,10 @@ def remove(file_path, no_exist=False, recursive=False):
     if no_exist is not None:
         return no_exist
     raise IOError("File '{}' does not exist.".format(file_path))
+
+
+def exists(fname):
+    return os.path.isfile(make_path(fname))
 
 
 def rename(fname, extension, no_exist=None):

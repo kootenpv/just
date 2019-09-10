@@ -3,7 +3,7 @@ from setuptools import setup
 
 MAJOR_VERSION = '0'
 MINOR_VERSION = '6'
-MICRO_VERSION = '84'
+MICRO_VERSION = '86'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(
@@ -13,7 +13,15 @@ setup(
     author='Pascal van Kooten',
     url='https://github.com/kootenpv/just',
     author_email='kootenpv@gmail.com',
-    install_requires=['pyyaml', 'dsv', 'glob2', 'dill', "jsonpath_rw"],
+    install_requires=[
+        'pyyaml',
+        'dsv',
+        'glob2',
+        'dill',
+        "jsonpath_rw",
+        "preconvert",
+        "preconvert_numpy",
+    ],
     entry_points={'console_scripts': ['just = just.__main__:main']},
     classifiers=[
         'Intended Audience :: Developers',
