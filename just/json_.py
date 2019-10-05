@@ -43,9 +43,7 @@ def iread(fn):
         for i, line in enumerate(f):
             try:
                 yield json.loads(line)
-            except StopIteration:
-                raise
-            except:
+            except Exception as e:
                 msg = "JSON-L parsing error in line number {} in the jsonl file".format(i)
                 raise Exception(msg, line)
 
