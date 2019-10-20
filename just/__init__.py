@@ -24,7 +24,7 @@ from just.log import log
 from just.jpath import json_extract
 
 __project__ = "just"
-__version__ = "0.6.90"
+__version__ = "0.6.91"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -130,17 +130,26 @@ def iwrite(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
     return writer(obj, fname, mkdir_no_exist, skip_if_exist, "iwrite")
 
 
-def remove(file_path, no_exist=False, recursive=False):
+def remove(file_path, no_exist=False, allow_recursive=False):
+    if isinstance(file_path, (tuple, list)):
+        file_path = os.path.join(*file_path)
+    if "*" in file_path:
+        if not allow_recursive:
+            raise IOError("Cannot remove wildcard unless allow_recursive=True")
+        paths = glob(file_path)
+        for fn in sorted(paths, key=lambda x: -len(x)):
+            os.remove(fn)
+        return bool(paths)
     file_path = make_path(file_path)
     if os.path.isfile(file_path):
         os.remove(file_path)
         return True
     if os.path.isdir(file_path):
-        if recursive:
+        if allow_recursive:
             shutil.rmtree(file_path)
             return True
         else:
-            raise IOError("Cannot remove directory unless recursive=True")
+            raise IOError("Cannot remove directory unless allow_recursive=True")
     # if there is a default value, return that if no file/dir found when attempting to remove
     if no_exist is not None:
         return no_exist

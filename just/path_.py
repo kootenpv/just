@@ -27,7 +27,7 @@ def find_just_path(base=None, max_depth=5):
 
 def get_likely_path():
     # try:
-        #main_path = os.path.abspath(sys.modules['__main__'].__file__)
+    # main_path = os.path.abspath(sys.modules['__main__'].__file__)
     # except AttributeError:
     main_path = os.path.realpath('__file__')
     return os.path.dirname(main_path)
@@ -47,4 +47,5 @@ def get_just_path():
 
 def make_path(filename):
     just_path = get_just_path()
+    filename = filename.replace("file://", "")
     return os.path.join(just_path, os.path.expanduser(filename))

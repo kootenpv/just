@@ -1,6 +1,8 @@
 import time
 import json
 
+session = None
+
 
 def _retry(request_fn, max_retries, delay_base, raw, kwargs):
     from requests import RequestException
@@ -32,17 +34,25 @@ def _retry(request_fn, max_retries, delay_base, raw, kwargs):
 def get(url, params=None, max_retries=1, delay_base=3, raw=False, **kwargs):
     import requests
 
+    global session
+    if session is None:
+        session = requests.Session()
+
     kwargs['url'] = url
     kwargs['params'] = json.dumps(params) if params else ''
-    result = _retry(requests.get, max_retries, delay_base, raw, kwargs)
+    result = _retry(session.get, max_retries, delay_base, raw, kwargs)
     return result
 
 
 def post(url, params=None, data=None, max_retries=5, raw=False, delay_base=3, **kwargs):
     import requests
 
+    global session
+    if session is None:
+        session = requests.Session()
+
     kwargs['url'] = url
     kwargs['params'] = json.dumps(params) if params else ''
     kwargs['data'] = json.dumps(data) if data else ''
-    result = _retry(requests.post, max_retries, delay_base, raw, kwargs)
+    result = _retry(session.post, max_retries, delay_base, raw, kwargs)
     return result
