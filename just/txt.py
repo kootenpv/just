@@ -1,8 +1,5 @@
-import gzip
-
-
 def read(fname):
-    if isinstance(fname, gzip.GzipFile):
+    if not isinstance(fname, str):
         return fname.read().decode()
     with open(fname) as f:
         return f.read()
@@ -17,8 +14,8 @@ def iread(fname):
 
 
 def write(obj, fname):
-    if isinstance(fname, gzip.GzipFile):
-        fname.write(obj)
+    if not isinstance(fname, str):
+        fname.write(obj.encode())
     else:
         with open(fname, "w") as f:
             f.write(obj)

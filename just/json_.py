@@ -1,11 +1,10 @@
 import warnings
-import gzip
 
 
 def read(fn, warn=False):
     from preconvert.output import json
 
-    if isinstance(fn, gzip.GzipFile):
+    if not isinstance(fn, str):
         return json.load(fn)
     if fn.endswith(".jsonl"):
         if warn:
@@ -18,8 +17,8 @@ def read(fn, warn=False):
 def append(obj, fn):
     from preconvert.output import json
 
-    if isinstance(fn, gzip.GzipFile):
-        raise TypeError("Cannot append to gzip")
+    if not isinstance(fn, str):
+        raise TypeError("Cannot append to compression")
     with open(fn, "a+") as f:
         f.write(json.dumps(obj) + "\n")
 
@@ -27,7 +26,7 @@ def append(obj, fn):
 def write(obj, fn):
     from preconvert.output import json
 
-    if isinstance(fn, gzip.GzipFile):
+    if not isinstance(fn, str):
         fn.write(bytes(json.dumps(obj), encoding="utf8"))
     else:
         with open(fn, "w") as f:
@@ -37,8 +36,8 @@ def write(obj, fn):
 def iread(fn):
     from preconvert.output import json
 
-    if isinstance(fn, gzip.GzipFile):
-        raise TypeError("Cannot iteratively read gzip")
+    if not isinstance(fn, str):
+        raise TypeError("Cannot iteratively read compressed file now")
     with open(fn) as f:
         for i, line in enumerate(f):
             try:
@@ -51,8 +50,8 @@ def iread(fn):
 def iwrite(obj, fn):
     from preconvert.output import json
 
-    if isinstance(fn, gzip.GzipFile):
-        raise TypeError("Cannot iteratively write gzip")
+    if not isinstance(fn, str):
+        raise TypeError("Cannot iteratively write compressed")
     with open(fn, "w") as f:
         for chunk in obj:
             f.write(json.dumps(chunk) + "\n")

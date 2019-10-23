@@ -7,7 +7,6 @@ just.print_version
 """
 
 import os
-import gzip
 import shutil
 import just.txt as txt
 import just.json_ as json
@@ -23,8 +22,12 @@ from just.dir import mkdir
 from just.log import log
 from just.jpath import json_extract
 
+# In [19]: with open("fuck.xz", "wb") as f: f.write(lzma.compress(html.encode()))
+
+# In [20]: with lzma.open("fuck.xz") as f: hh=f.read()
+
 __project__ = "just"
-__version__ = "0.6.92"
+__version__ = "0.6.93"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -41,34 +44,70 @@ EXT_TO_MODULE = {
     "pkl": pickle,
 }
 
+EXT_TO_COMPRESSION = {}
+
+try:
+    import gzip
+
+    EXT_TO_COMPRESSION.update({"gz": gzip.GzipFile, "gzip": gzip.GzipFile})
+except ImportError:
+    pass
+
+try:
+    import bz2
+
+    EXT_TO_COMPRESSION.update({"bz2": bz2.BZ2File, "bzip2": bz2.BZ2File, "bzip": bz2.BZ2File})
+except ImportError:
+    pass
+
+try:
+    import lzma
+
+    EXT_TO_COMPRESSION.update({"xz": lzma.open})
+except ImportError:
+    pass
+
+try:
+    import just.zstd_ as zstd
+
+    EXT_TO_COMPRESSION.update(
+        {"zstd": zstd.ZstdFile, "zst": zstd.ZstdFile, "zstandard": zstd.ZstdFile}
+    )
+except ImportError:
+    pass
+
 
 def reader(fname, no_exist, read_func_name, unknown_type, ignore_exceptions):
     fname = make_path(fname)
     if not os.path.isfile(fname) and no_exist is not None:
         return no_exist
-    gzname = False
-    if fname.endswith(".gz"):
-        gzname = fname
-        fname = fname[:-3]
-    ext = fname.split(".")[-1] if "." in fname[-6:] else "txt"
+    compression = []
+    stripped_fname = fname
+    for k, v in EXT_TO_COMPRESSION.items():
+        if fname.endswith(k):
+            compression.append(v)
+            stripped_fname = stripped_fname[: -(len(k) + 1)]
+    ext = stripped_fname.split(".")[-1] if "." in stripped_fname[-6:] else "txt"
     if ext not in EXT_TO_MODULE and unknown_type == "RAISE":
         raise TypeError("just does not yet cover '{}'".format(ext))
     reader_module = EXT_TO_MODULE.get(ext, None) or EXT_TO_MODULE[unknown_type]
     read_fn = getattr(reader_module, read_func_name)
     if ignore_exceptions is not None:
         try:
-            if gzname:
+            if compression:
+                compression = compression[0]
                 # actually returns a file handler >.<
-                with gzip.GzipFile(gzname, "rb") as f:
+                with compression(fname, "rb") as f:
                     return read_fn(f)
             else:
                 return read_fn(fname)
         except ignore_exceptions:
             return None
     else:
-        if gzname:
+        if compression:
+            compression = compression[0]
             # actually returns a file handler >.<
-            with gzip.GzipFile(gzname, "rb") as f:
+            with compression(fname, "rb") as f:
                 return read_fn(f)
         else:
             return read_fn(fname)
@@ -90,16 +129,21 @@ def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name):
         dname = os.path.dirname(fname)
         if dname not in set([".", "..", ""]):
             mkdir(dname)
-    gzname = False
-    if fname.endswith(".gz"):
-        gzname = fname
-        fname = fname[:-3]
-    ext = fname.split(".")[-1] if "." in fname[-6:] else "txt"
+
+    compression = []
+    stripped_fname = fname
+    for k, v in EXT_TO_COMPRESSION.items():
+        if fname.endswith(k):
+            compression.append(v)
+            stripped_fname = stripped_fname[: -(len(k) + 1)]
+
+    ext = stripped_fname.split(".")[-1] if "." in stripped_fname[-6:] else "txt"
     writer_module = EXT_TO_MODULE[ext]
     write_fn = getattr(writer_module, write_func_name)
-    if gzname:
+    if compression:
         # actually returns a file handler >.<
-        with gzip.GzipFile(gzname, "w") as f:
+        compression = compression[0]
+        with compression(fname, "wb") as f:
             return write_fn(obj, f)
     else:
         return write_fn(obj, fname)
