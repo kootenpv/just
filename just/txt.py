@@ -6,8 +6,8 @@ def read(fname):
 
 
 def iread(fname):
-    if isinstance(fname, gzip.GzipFile):
-        raise TypeError("Cannot iteratively read gzip")
+    if not isinstance(fname, str):
+        raise TypeError("Cannot iteratively read compressed file at this point.")
     with open(fname) as f:
         for line in f:
             yield line.rstrip("\n")
