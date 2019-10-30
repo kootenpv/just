@@ -3,6 +3,7 @@ import errno
 
 
 def mkdir(path, mode=0o777):
+    path = os.path.expanduser(path)
     try:
         os.makedirs(path, mode)
     # Python >2.5
