@@ -6,7 +6,8 @@ __cached_just_path = None
 
 
 def glob(path):
-    return glob2.glob(make_path(path))
+    path = make_path(path)
+    return glob2.glob(path)
 
 
 def get_just_env_path():
@@ -48,4 +49,7 @@ def get_just_path():
 def make_path(filename):
     just_path = get_just_path()
     filename = filename.replace("file://", "")
-    return os.path.join(just_path, os.path.expanduser(filename))
+    path = os.path.join(just_path, os.path.expanduser(filename))
+    if path.endswith("."):
+        path = path[:-1]
+    return path

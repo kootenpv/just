@@ -7,12 +7,13 @@ just.print_version
 """
 
 import os
+import errno
 import shutil
 import just.txt as txt
 import just.json_ as json
 import just.newl as newl
 import just.yaml_ as yaml
-import just.csv_ as csv
+import just.bytes as bytes_
 import just.pickle_ as pickle
 from just.path_ import make_path
 from just.path_ import glob
@@ -27,7 +28,7 @@ from just.jpath import json_extract
 # In [20]: with lzma.open("fuck.xz") as f: hh=f.read()
 
 __project__ = "just"
-__version__ = "0.7.96"
+__version__ = "0.7.97"
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -38,10 +39,9 @@ EXT_TO_MODULE = {
     "jsonl": json,
     "yaml": yaml,
     "yml": yaml,
-    "csv": csv,
-    "tsv": csv,
     "pickle": pickle,
     "pkl": pickle,
+    "bytes": bytes_,
 }
 
 EXT_TO_COMPRESSION = {}
@@ -87,7 +87,7 @@ def reader(fname, no_exist, read_func_name, unknown_type, ignore_exceptions):
         if fname.endswith(k):
             compression.append(v)
             stripped_fname = stripped_fname[: -(len(k) + 1)]
-    ext = stripped_fname.split(".")[-1] if "." in stripped_fname[-6:] else "txt"
+    ext = stripped_fname.split(".")[-1] if "." in stripped_fname[-6:] else None
     if ext not in EXT_TO_MODULE and unknown_type == "RAISE":
         raise TypeError("just does not yet cover '{}'".format(ext))
     reader_module = EXT_TO_MODULE.get(ext, None) or EXT_TO_MODULE[unknown_type]
@@ -121,7 +121,7 @@ def multi_read(star_path, no_exist=None, unknown_type="RAISE", ignore_exceptions
     return {x: read(x, no_exist, unknown_type, ignore_exceptions) for x in glob(star_path)}
 
 
-def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name):
+def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name, unknown_type):
     fname = make_path(fname)
     if skip_if_exist and os.path.isfile(fname):  # pragma: no cover
         return False
@@ -137,8 +137,10 @@ def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name):
             compression.append(v)
             stripped_fname = stripped_fname[: -(len(k) + 1)]
 
-    ext = stripped_fname.split(".")[-1] if "." in stripped_fname[-6:] else "txt"
-    writer_module = EXT_TO_MODULE[ext]
+    ext = stripped_fname.split(".")[-1] if "." in stripped_fname[-6:] else None
+    if ext not in EXT_TO_MODULE and unknown_type == "RAISE":
+        raise TypeError("just does not yet cover '{}'".format(ext))
+    writer_module = EXT_TO_MODULE.get(ext, None) or EXT_TO_MODULE[unknown_type]
     write_fn = getattr(writer_module, write_func_name)
     if compression:
         # actually returns a file handler >.<
@@ -149,15 +151,15 @@ def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name):
         return write_fn(obj, fname)
 
 
-def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
-    return writer(obj, fname, mkdir_no_exist, skip_if_exist, "write")
+def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False, unknown_type="RAISE"):
+    return writer(obj, fname, mkdir_no_exist, skip_if_exist, "write", unknown_type)
 
 
 # only supported for JSON Lines so far.
 
 
-def append(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
-    return writer(obj, fname, mkdir_no_exist, skip_if_exist, "append")
+def append(obj, fname, mkdir_no_exist=True, skip_if_exist=False, unknown_type="RAISE"):
+    return writer(obj, fname, mkdir_no_exist, skip_if_exist, "append", unknown_type)
 
 
 def multi_write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
@@ -170,8 +172,26 @@ def iread(fname, no_exist=None, unknown_type="RAISE", ignore_exceptions=None):
     return reader(fname, no_exist, "iread", unknown_type, ignore_exceptions)
 
 
-def iwrite(obj, fname, mkdir_no_exist=True, skip_if_exist=False):
-    return writer(obj, fname, mkdir_no_exist, skip_if_exist, "iwrite")
+def iwrite(obj, fname, mkdir_no_exist=True, skip_if_exist=False, unknown_type="RAISE"):
+    return writer(obj, fname, mkdir_no_exist, skip_if_exist, "iwrite", unknown_type)
+
+
+def jpath(fname_or_dc, jsonpath_expression):
+    if isinstance(fname_or_dc, str):
+        fname_or_dc = read(fname_or_dc)
+    return json_extract(fname_or_dc, jsonpath_expression)
+
+
+def mkdir(path, mode=0o777):
+    path = make_path(path)
+    try:
+        os.makedirs(path, mode)
+    # Python >2.5
+    except OSError as exc:  # pragma: no cover
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
 
 
 def remove(file_path, no_exist=False, allow_recursive=False):
@@ -212,7 +232,21 @@ def rename(fname, extension, no_exist=None):
     return True
 
 
-def jpath(fname_or_dc, jsonpath_expression):
-    if isinstance(fname_or_dc, str):
-        fname_or_dc = read(fname_or_dc)
-    return json_extract(fname_or_dc, jsonpath_expression)
+def _as_glob(dir_name, recursive):
+    dir_name = make_path(dir_name)
+    if not "*" in dir_name:
+        if dir_name.endswith("/"):
+            dir_name += "*"
+        else:
+            dir_name += "/*"
+        if recursive:
+            dir_name += "*"
+    return dir_name
+
+
+def ls(dir_name, recursive=False, no_dirs=False):
+    dir_name = _as_glob(dir_name, recursive)
+    if no_dirs:
+        return [x for x in glob(dir_name) if not os.path.isdir(x)]
+    else:
+        return glob(dir_name)
