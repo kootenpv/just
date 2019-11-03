@@ -94,3 +94,7 @@ def test_unsuccesful_read():
 
 def test_unsuccesful_remove():
     assert just.remove("A" * 100, 42) == 42
+
+
+def test_ls():
+    assert just.ls(".")
