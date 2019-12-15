@@ -48,6 +48,8 @@ def get_just_path():
 
 def make_path(filename):
     just_path = get_just_path()
+    if not isinstance(filename, (str, bytes)):
+        filename = filename.name.encode("utf8").decode()
     filename = filename.replace("file://", "")
     path = os.path.join(just_path, os.path.expanduser(filename))
     if path.endswith("."):
