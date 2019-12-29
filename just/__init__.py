@@ -28,12 +28,13 @@ from just.jpath import json_extract
 # In [20]: with lzma.open("fuck.xz") as f: hh=f.read()
 
 __project__ = "just"
-__version__ = "0.7.98"
+__version__ = "0.7.100"
 
 EXT_TO_MODULE = {
     "html": txt,
     "py": txt,
     "txt": txt,
+    "md": txt,
     "newl": newl,
     "json": json,
     "jsonl": json,
