@@ -88,6 +88,18 @@ def test_find_just_path():
         os.remove(just_file)
 
 
+def test_txt_append():
+    fname = "testobj.txt"
+    obj = "bla"
+    just.append(obj, "testobj.txt")
+    try:
+        assert [x for x in just.iread(fname)] == [obj]
+        just.append(obj, "testobj.txt")
+        assert [x for x in just.iread(fname)] == [obj, obj]
+    finally:
+        os.remove(fname)
+
+
 def test_unsuccesful_read():
     assert just.read("A" * 100, 42) == 42
 

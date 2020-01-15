@@ -19,3 +19,10 @@ def write(obj, fname):
     else:
         with open(fname, "w") as f:
             f.write(obj)
+
+
+def append(obj, fname):
+    if not isinstance(fname, str):
+        raise TypeError("Cannot append to compression")
+    with open(fname, "a+") as f:
+        f.write(obj + "\n")
