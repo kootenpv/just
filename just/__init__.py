@@ -28,7 +28,7 @@ from just.jpath import json_extract
 # In [20]: with lzma.open("fuck.xz") as f: hh=f.read()
 
 __project__ = "just"
-__version__ = "0.7.102"
+__version__ = "0.7.103"
 
 EXT_TO_MODULE = {
     "html": txt,

@@ -17,10 +17,11 @@ def _retry(request_fn, max_retries, delay_base, raw, kwargs):
     #     kwargs["headers"] = {}
     # if 'User-Agent' not in kwargs:
     #     kwargs["headers"]['User-Agent'] = 'Just Agent 1.0'
-    timeout = kwargs.get("timeout", delay_base)
+    if "timeout" not in kwargs:
+        kwargs["timeout"] = delay_base
     while tries < max_retries:
         try:
-            r = request_fn(timeout=timeout, **kwargs)
+            r = request_fn(**kwargs)
             if r.status_code > 399:
                 return None
             break
