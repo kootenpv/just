@@ -3,6 +3,7 @@ import time
 import json
 import requests
 import diskcache
+from just.dir import mkdir
 
 session = None
 
@@ -38,14 +39,17 @@ def _retry(request_fn, max_retries, delay_base, raw, kwargs):
     return r.text
 
 
-def get(url, params=None, max_retries=1, delay_base=3, raw=False, cache_name=None, **kwargs):
+def get(url, params=None, max_retries=1, delay_base=3, raw=False, use_cache=False, **kwargs):
     cache_key = (url, params)
+    if use_cache:
+        cache_name = url.split("/")[2].split("?")[0]
 
-    if cache_name is not None and cache_name not in caches:
-        caches[cache_name] = diskcache.Cache(os.path.expanduser("~/.just_requests/" + cache_name))
+        if cache_name not in caches:
+            base = mkdir("~/.just_requests/")
+            caches[cache_name] = diskcache.Cache(base + cache_name)
 
-    if cache_name is not None and cache_key in caches[cache_name]:
-        return caches[cache_name][cache_key]
+        if use_cache and cache_key in caches[cache_name]:
+            return caches[cache_name][cache_key]
 
     global session
     if session is None:
@@ -56,7 +60,7 @@ def get(url, params=None, max_retries=1, delay_base=3, raw=False, cache_name=Non
         kwargs['params'] = params
     result = _retry(session.get, max_retries, delay_base, raw, kwargs)
 
-    if cache_name is not None:
+    if use_cache:
         caches[cache_name][cache_key] = result
 
     return result
@@ -70,15 +74,19 @@ def post(
     raw=False,
     json=None,
     delay_base=3,
-    cache_name=None,
+    use_cache=False,
     **kwargs
 ):
     cache_key = (url, params, data, json)
-    if cache_name is not None and cache_name not in caches:
-        caches[cache_name] = diskcache.Cache(os.path.expanduser("~/.just_requests/" + cache_name))
+    if use_cache:
+        cache_name = url.split("/")[2].split("?")[0]
 
-    if cache_name is not None and cache_key in caches[cache_name]:
-        return caches[cache_name][cache_key]
+        if cache_name not in caches:
+            base = mkdir("~/.just_requests/")
+            caches[cache_name] = diskcache.Cache(base + cache_name)
+
+        if use_cache and cache_key in caches[cache_name]:
+            return caches[cache_name][cache_key]
 
     global session
     if session is None:
@@ -94,7 +102,7 @@ def post(
 
     result = _retry(session.post, max_retries, delay_base, raw, kwargs)
 
-    if cache_name is not None:
+    if use_cache:
         caches[cache_name][cache_key] = result
 
     return result

@@ -12,3 +12,4 @@ def mkdir(path, mode=0o777):
             pass
         else:
             raise
+    return path
