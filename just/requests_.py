@@ -6,7 +6,7 @@ import diskcache
 
 session = None
 
-cache = diskcache.Cache(os.path.expanduser("~/.just_requests"))
+caches = {}
 
 
 def _retry(request_fn, max_retries, delay_base, raw, kwargs):
@@ -38,13 +38,14 @@ def _retry(request_fn, max_retries, delay_base, raw, kwargs):
     return r.text
 
 
-def get(url, params=None, max_retries=1, delay_base=3, raw=False, use_cache=False, **kwargs):
+def get(url, params=None, max_retries=1, delay_base=3, raw=False, cache_name=None, **kwargs):
     cache_key = (url, params)
-    if cache_key in cache:
-        if not use_cache:
-            del cache[cache_key]
-        else:
-            return cache[cache_key]
+
+    if cache_name is not None and cache_name not in caches:
+        caches[cache_name] = diskcache.Cache(os.path.expanduser("~/.just_requests/" + cache_name))
+
+    if cache_name is not None and cache_key in caches[cache_name]:
+        return caches[cache_name][cache_key]
 
     global session
     if session is None:
@@ -54,8 +55,10 @@ def get(url, params=None, max_retries=1, delay_base=3, raw=False, use_cache=Fals
     if params is not None:
         kwargs['params'] = params
     result = _retry(session.get, max_retries, delay_base, raw, kwargs)
-    if use_cache:
-        cache[cache_key] = result
+
+    if cache_name is not None:
+        caches[cache_name][cache_key] = result
+
     return result
 
 
@@ -67,15 +70,15 @@ def post(
     raw=False,
     json=None,
     delay_base=3,
-    use_cache=False,
+    cache_name=None,
     **kwargs
 ):
     cache_key = (url, params, data, json)
-    if cache_key in cache:
-        if not use_cache:
-            del cache[cache_key]
-        else:
-            return cache[cache_key]
+    if cache_name is not None and cache_name not in caches:
+        caches[cache_name] = diskcache.Cache(os.path.expanduser("~/.just_requests/" + cache_name))
+
+    if cache_name is not None and cache_key in caches[cache_name]:
+        return caches[cache_name][cache_key]
 
     global session
     if session is None:
@@ -90,6 +93,8 @@ def post(
         kwargs["json"] = json
 
     result = _retry(session.post, max_retries, delay_base, raw, kwargs)
-    if use_cache:
-        cache[cache_key] = result
+
+    if cache_name is not None:
+        caches[cache_name][cache_key] = result
+
     return result
