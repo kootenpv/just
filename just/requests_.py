@@ -1,7 +1,12 @@
+import os
 import time
 import json
+import requests
+import diskcache
 
 session = None
+
+cache = diskcache.Cache(os.path.expanduser("~/.just_requests"))
 
 
 def _retry(request_fn, max_retries, delay_base, raw, kwargs):
@@ -12,9 +17,10 @@ def _retry(request_fn, max_retries, delay_base, raw, kwargs):
     #     kwargs["headers"] = {}
     # if 'User-Agent' not in kwargs:
     #     kwargs["headers"]['User-Agent'] = 'Just Agent 1.0'
+    timeout = kwargs.get("timeout", delay_base)
     while tries < max_retries:
         try:
-            r = request_fn(timeout=delay_base, **kwargs)
+            r = request_fn(timeout=timeout, **kwargs)
             if r.status_code > 399:
                 return None
             break
@@ -31,8 +37,13 @@ def _retry(request_fn, max_retries, delay_base, raw, kwargs):
     return r.text
 
 
-def get(url, params=None, max_retries=1, delay_base=3, raw=False, **kwargs):
-    import requests
+def get(url, params=None, max_retries=1, delay_base=3, raw=False, use_cache=False, **kwargs):
+    cache_key = (url, params)
+    if cache_key in cache:
+        if not use_cache:
+            del cache[cache_key]
+        else:
+            return cache[cache_key]
 
     global session
     if session is None:
@@ -42,11 +53,28 @@ def get(url, params=None, max_retries=1, delay_base=3, raw=False, **kwargs):
     if params is not None:
         kwargs['params'] = params
     result = _retry(session.get, max_retries, delay_base, raw, kwargs)
+    if use_cache:
+        cache[cache_key] = result
     return result
 
 
-def post(url, params=None, data=None, max_retries=5, raw=False, json=None, delay_base=3, **kwargs):
-    import requests
+def post(
+    url,
+    params=None,
+    data=None,
+    max_retries=5,
+    raw=False,
+    json=None,
+    delay_base=3,
+    use_cache=False,
+    **kwargs
+):
+    cache_key = (url, params, data, json)
+    if cache_key in cache:
+        if not use_cache:
+            del cache[cache_key]
+        else:
+            return cache[cache_key]
 
     global session
     if session is None:
@@ -61,4 +89,6 @@ def post(url, params=None, data=None, max_retries=5, raw=False, json=None, delay
         kwargs["json"] = json
 
     result = _retry(session.post, max_retries, delay_base, raw, kwargs)
+    if use_cache:
+        cache[cache_key] = result
     return result
