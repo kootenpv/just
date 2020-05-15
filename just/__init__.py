@@ -21,4 +21,4 @@ from just.jpath import json_extract, jpath
 # In [20]: with lzma.open("fuck.xz") as f: hh=f.read()
 
 __project__ = "just"
-__version__ = "0.7.107"
+__version__ = "0.7.108"

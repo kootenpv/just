@@ -3,7 +3,7 @@ from setuptools import setup
 
 MAJOR_VERSION = '0'
 MINOR_VERSION = '7'
-MICRO_VERSION = '107'
+MICRO_VERSION = '108'
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(
@@ -22,7 +22,6 @@ setup(
         "preconvert",
         "preconvert_numpy",
         "requests",
-        "diskcache",
     ],
     entry_points={'console_scripts': ['just = just.__main__:main']},
     classifiers=[

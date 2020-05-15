@@ -1,9 +1,10 @@
 import time
+import hashlib
 import requests
 from requests.utils import dict_from_cookiejar, cookiejar_from_dict
-import diskcache
 from just.dir import mkdir
-from just.read_write import write
+from just.path_ import exists, remove
+from just.read_write import write, read
 
 session = None
 
@@ -12,7 +13,20 @@ timers = {}
 sessions = {}
 
 
-def _retry(method, max_retries, delay_base, raw, caching, sleep_time, kwargs):
+def get_cache_file_name(domain, request_info, compression=".gz"):
+    from preconvert.output import json
+
+    key = json.dumps(request_info)
+    m = hashlib.md5()
+    m.update(key.encode("utf8"))
+    md5 = m.hexdigest()
+    dir_name, f_name = md5[:3], md5[3:]
+    if not compression:
+        compression = ""
+    return f"~/.just_requests/{domain}/{dir_name}/{f_name}.json{compression}"
+
+
+def _retry(method, max_retries, delay_base, raw, caching, cache_compression, sleep_time, kwargs):
     from requests import RequestException
 
     tries = 0
@@ -20,23 +34,21 @@ def _retry(method, max_retries, delay_base, raw, caching, sleep_time, kwargs):
     domain_name = url.split("/")[2].split("?")[0].replace("www.", "")
 
     use_cache, *cache_key = caching
-    cache_key = tuple(cache_key)
 
-    if use_cache:
+    cache_file_name = get_cache_file_name(domain_name, cache_key, cache_compression)
 
-        if domain_name not in caches:
-            base = mkdir("~/.just_requests/")
-            caches[domain_name] = diskcache.Cache(base + domain_name)
-
-        if cache_key in caches[domain_name]:
-            return caches[domain_name][cache_key]
-
-    else:
-        if caches.get(domain_name, {}).get(cache_key):
-            del caches[domain_name][cache_key]
+    if exists(cache_file_name):
+        if not use_cache:
+            remove(cache_file_name)
+        else:
+            return read(cache_file_name)["resp"]
 
     if "timeout" not in kwargs:
         kwargs["timeout"] = delay_base
+
+    cookies = kwargs.get("cookies")
+    if isinstance(cookies, dict):
+        kwargs["cookies"] = cookiejar_from_dict(cookies)
 
     if domain_name not in sessions:
         sessions[domain_name] = requests.Session()
@@ -79,7 +91,7 @@ def _retry(method, max_retries, delay_base, raw, caching, sleep_time, kwargs):
         r = r.text
 
     if use_cache:
-        caches[domain_name][cache_key] = r
+        write({"resp": r, "request_info": cache_key}, cache_file_name)
 
     return r
 
@@ -91,8 +103,8 @@ def get(
     delay_base=3,
     raw=False,
     use_cache=False,
+    cache_compression=".gz",
     sleep_time=None,
-    session_name=None,
     fname=None,
     **kwargs,
 ):
@@ -102,7 +114,9 @@ def get(
     if params is not None:
         kwargs['params'] = params
 
-    result = _retry("get", max_retries, delay_base, raw, caching, sleep_time, kwargs)
+    result = _retry(
+        "get", max_retries, delay_base, raw, caching, cache_compression, sleep_time, kwargs
+    )
 
     if fname is not None:
         write(result, fname)
@@ -119,8 +133,8 @@ def post(
     json=None,
     delay_base=3,
     use_cache=False,
+    cache_compression=".gz",
     sleep_time=None,
-    session_name=None,
     fname=None,
     **kwargs,
 ):
@@ -134,7 +148,9 @@ def post(
     if json is not None:
         kwargs["json"] = json
 
-    result = _retry("post", max_retries, delay_base, raw, caching, sleep_time, kwargs)
+    result = _retry(
+        "post", max_retries, delay_base, raw, caching, cache_compression, sleep_time, kwargs
+    )
 
     if fname is not None:
         write(result, fname)
