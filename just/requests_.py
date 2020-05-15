@@ -1,7 +1,9 @@
 import time
 import requests
+from requests.utils import dict_from_cookiejar, cookiejar_from_dict
 import diskcache
 from just.dir import mkdir
+from just.read_write import write
 
 session = None
 
@@ -10,14 +12,17 @@ timers = {}
 sessions = {}
 
 
-def _retry(method, max_retries, delay_base, raw, cache_key, sleep_time, kwargs):
+def _retry(method, max_retries, delay_base, raw, caching, sleep_time, kwargs):
     from requests import RequestException
 
     tries = 0
     url = kwargs["url"]
     domain_name = url.split("/")[2].split("?")[0].replace("www.", "")
 
-    if cache_key:
+    use_cache, *cache_key = caching
+    cache_key = tuple(cache_key)
+
+    if use_cache:
 
         if domain_name not in caches:
             base = mkdir("~/.just_requests/")
@@ -25,6 +30,10 @@ def _retry(method, max_retries, delay_base, raw, cache_key, sleep_time, kwargs):
 
         if cache_key in caches[domain_name]:
             return caches[domain_name][cache_key]
+
+    else:
+        if caches.get(domain_name, {}).get(cache_key):
+            del caches[domain_name][cache_key]
 
     if "timeout" not in kwargs:
         kwargs["timeout"] = delay_base
@@ -69,7 +78,7 @@ def _retry(method, max_retries, delay_base, raw, cache_key, sleep_time, kwargs):
     else:
         r = r.text
 
-    if cache_key:
+    if use_cache:
         caches[domain_name][cache_key] = r
 
     return r
@@ -83,19 +92,20 @@ def get(
     raw=False,
     use_cache=False,
     sleep_time=None,
-    **kwargs
+    session_name=None,
+    fname=None,
+    **kwargs,
 ):
-    cache_key = (url, params) if use_cache else False
-
-    global session
-    if session is None:
-        session = requests.Session()
+    caching = (use_cache, url, params)
 
     kwargs['url'] = url
     if params is not None:
         kwargs['params'] = params
 
-    result = _retry("get", max_retries, delay_base, raw, cache_key, sleep_time, kwargs)
+    result = _retry("get", max_retries, delay_base, raw, caching, sleep_time, kwargs)
+
+    if fname is not None:
+        write(result, fname)
 
     return result
 
@@ -110,9 +120,11 @@ def post(
     delay_base=3,
     use_cache=False,
     sleep_time=None,
-    **kwargs
+    session_name=None,
+    fname=None,
+    **kwargs,
 ):
-    cache_key = (url, params, data, json) if use_cache else False
+    caching = (use_cache, url, params, data, json)
 
     kwargs['url'] = url
     if params is not None:
@@ -122,6 +134,20 @@ def post(
     if json is not None:
         kwargs["json"] = json
 
-    result = _retry("post", max_retries, delay_base, raw, cache_key, sleep_time, kwargs)
+    result = _retry("post", max_retries, delay_base, raw, caching, sleep_time, kwargs)
+
+    if fname is not None:
+        write(result, fname)
 
     return result
+
+
+def save_session(name, session):
+    if any(["Session" in x.__name__ for x in session.__class__.__mro__]):
+        try:
+            print("trf")
+            session.transfer_driver_cookies_to_session()
+        except Exception as e:
+            print("ERR", e)
+        session = {"headers": session.headers, "cookies": dict_from_cookiejar(session.cookies)}
+    write(session, f"~/.just_sessions/" + name + ".json")

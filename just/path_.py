@@ -1,6 +1,7 @@
 import inspect
 import os
 import glob2
+import errno
 
 __cached_just_path = None
 
@@ -55,3 +56,73 @@ def make_path(filename):
     if path.endswith("."):
         path = path[:-1]
     return path
+
+
+def exists(fname):
+    return os.path.isfile(make_path(fname))
+
+
+def rename(fname, extension, no_exist=None):
+    fname = make_path(fname)
+    if not os.path.isfile(fname) and no_exist is not None:
+        return False
+    os.rename(fname, fname + "." + extension)
+    return True
+
+
+def _as_glob(dir_name, recursive):
+    dir_name = make_path(dir_name)
+    if not "*" in dir_name:
+        if dir_name.endswith("/"):
+            dir_name += "*"
+        else:
+            dir_name += "/*"
+        if recursive:
+            dir_name += "*"
+    return dir_name
+
+
+def ls(dir_name, recursive=False, no_dirs=False):
+    dir_name = _as_glob(dir_name, recursive)
+    if no_dirs:
+        return [x for x in glob(dir_name) if not os.path.isdir(x)]
+    else:
+        return glob(dir_name)
+
+
+def mkdir(path, mode=0o777):
+    path = make_path(path)
+    try:
+        os.makedirs(path, mode)
+    # Python >2.5
+    except OSError as exc:  # pragma: no cover
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+
+def remove(file_path, no_exist=False, allow_recursive=False):
+    if isinstance(file_path, (tuple, list)):
+        file_path = os.path.join(*file_path)
+    if "*" in file_path:
+        if not allow_recursive:
+            raise IOError("Cannot remove wildcard unless allow_recursive=True")
+        paths = glob(file_path)
+        for fn in sorted(paths, key=lambda x: -len(x)):
+            os.remove(fn)
+        return bool(paths)
+    file_path = make_path(file_path)
+    if os.path.isfile(file_path):
+        os.remove(file_path)
+        return True
+    if os.path.isdir(file_path):
+        if allow_recursive:
+            shutil.rmtree(file_path)
+            return True
+        else:
+            raise IOError("Cannot remove directory unless allow_recursive=True")
+    # if there is a default value, return that if no file/dir found when attempting to remove
+    if no_exist is not None:
+        return no_exist
+    raise IOError("File '{}' does not exist.".format(file_path))
