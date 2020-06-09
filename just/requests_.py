@@ -64,25 +64,39 @@ def _retry(method, max_retries, delay_base, raw, caching, cache_compression, sle
             time.sleep(diff)
 
     # retrying
+    err = False
     while tries < max_retries:
         try:
             r = request_fn(**kwargs)
             if r.status_code > 399:
-                r = None
+                err = None
             break
         except RequestException as e:
             tries += 1
             print("just.requests_", kwargs["url"], "attempt", tries, str(e))
             if tries == max_retries:
-                r = ""
+                err = ""
+                r = None
                 break
             time.sleep(delay_base ** tries)
 
     timers[domain_name] = time.time()
 
     # result handling
-    if r is None or r == "":
-        pass
+    if err is None or err == "":
+        text = r.text[:500] if r is not None else ""
+        if len(text) == 500:
+            text += "..."
+        print("ERR", r.status_code, url, text)
+        tmp = err
+        try:
+            err = r.json()
+        except:
+            try:
+                err = r.text
+            except:
+                err = ""
+        r = tmp
     elif raw:
         r = r.content
     elif "application/json" in r.headers['Content-Type']:
@@ -91,7 +105,10 @@ def _retry(method, max_retries, delay_base, raw, caching, cache_compression, sle
         r = r.text
 
     if use_cache:
-        write({"resp": r, "request_info": cache_key}, cache_file_name)
+        result = {"resp": r, "request_info": cache_key}
+        if err:
+            result["error"] = err
+        write(result, cache_file_name)
 
     return r
 
