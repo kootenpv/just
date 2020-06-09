@@ -87,7 +87,8 @@ def _retry(method, max_retries, delay_base, raw, caching, cache_compression, sle
         text = r.text[:500] if r is not None else ""
         if len(text) == 500:
             text += "..."
-        print("ERR", r.status_code, url, text)
+        code = r.status_code if r is not None else None
+        print("ERR", code, url, text)
         tmp = err
         try:
             err = r.json()
