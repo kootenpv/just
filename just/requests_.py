@@ -176,6 +176,12 @@ def post(
     return result
 
 
+def get_tree(*args, **kwargs):
+    import lxml.html
+
+    return lxml.html.fromstring(get(*args, **kwargs))
+
+
 def save_session(name, session):
     if any(["Session" in x.__name__ for x in session.__class__.__mro__]):
         try:
