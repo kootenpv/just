@@ -1,8 +1,9 @@
-from jsonpath_rw import parse
 from just.read_write import read
 
 
 def json_extract(dc, expr):
+    from jsonpath_rw import parse
+
     res = parse(expr).find(dc)
     if len(res) == 1:
         res = res[0].value

@@ -1,7 +1,5 @@
 import time
 import hashlib
-import requests
-from requests.utils import dict_from_cookiejar, cookiejar_from_dict
 from just.dir import mkdir
 from just.path_ import exists, remove
 from just.read_write import write, read
@@ -27,7 +25,8 @@ def get_cache_file_name(domain, request_info, compression=".gz"):
 
 
 def _retry(method, max_retries, delay_base, raw, caching, cache_compression, sleep_time, kwargs):
-    from requests import RequestException
+    from requests import RequestException, Session
+    from requests.utils import cookiejar_from_dict
 
     tries = 0
     url = kwargs["url"]
@@ -51,7 +50,7 @@ def _retry(method, max_retries, delay_base, raw, caching, cache_compression, sle
         kwargs["cookies"] = cookiejar_from_dict(cookies)
 
     if domain_name not in sessions:
-        sessions[domain_name] = requests.Session()
+        sessions[domain_name] = Session()
 
     # e.g. GET or POST
     request_fn = getattr(sessions[domain_name], method)
@@ -183,6 +182,8 @@ def get_tree(*args, **kwargs):
 
 
 def save_session(name, session):
+    from requests.utils import dict_from_cookiejar
+
     if any(["Session" in x.__name__ for x in session.__class__.__mro__]):
         try:
             print("trf")
