@@ -24,7 +24,18 @@ def get_cache_file_name(domain, request_info, compression=".gz"):
     return f"~/.just_requests/{domain}/{dir_name}/{f_name}.json{compression}"
 
 
-def _retry(method, max_retries, delay_base, raw, caching, cache_compression, sleep_time, kwargs):
+def _retry(
+    method,
+    max_retries,
+    delay_base,
+    raw,
+    caching,
+    cache_compression,
+    sleep_time,
+    reuse_session,
+    kwargs,
+):
+    import requests
     from requests import RequestException, Session
     from requests.utils import cookiejar_from_dict
 
@@ -49,11 +60,14 @@ def _retry(method, max_retries, delay_base, raw, caching, cache_compression, sle
     if isinstance(cookies, dict):
         kwargs["cookies"] = cookiejar_from_dict(cookies)
 
-    if domain_name not in sessions:
-        sessions[domain_name] = Session()
+    if reuse_session:
+        if domain_name not in sessions:
+            sessions[domain_name] = Session()
 
-    # e.g. GET or POST
-    request_fn = getattr(sessions[domain_name], method)
+        # e.g. GET or POST
+        request_fn = getattr(sessions[domain_name], method)
+    else:
+        request_fn = getattr(requests, method)
 
     if sleep_time and domain_name in timers:
         # 1200 - 1201 + 3
@@ -123,6 +137,7 @@ def get(
     cache_compression=".gz",
     sleep_time=None,
     fname=None,
+    reuse_session=True,
     **kwargs,
 ):
     caching = (use_cache, url, params)
@@ -132,7 +147,15 @@ def get(
         kwargs['params'] = params
 
     result = _retry(
-        "get", max_retries, delay_base, raw, caching, cache_compression, sleep_time, kwargs
+        "get",
+        max_retries,
+        delay_base,
+        raw,
+        caching,
+        cache_compression,
+        sleep_time,
+        reuse_session,
+        kwargs,
     )
 
     if fname is not None:
@@ -153,6 +176,7 @@ def post(
     cache_compression=".gz",
     sleep_time=None,
     fname=None,
+    reuse_session=True,
     **kwargs,
 ):
     caching = (use_cache, url, params, data, json)
@@ -166,7 +190,15 @@ def post(
         kwargs["json"] = json
 
     result = _retry(
-        "post", max_retries, delay_base, raw, caching, cache_compression, sleep_time, kwargs
+        "post",
+        max_retries,
+        delay_base,
+        raw,
+        caching,
+        cache_compression,
+        sleep_time,
+        reuse_session,
+        kwargs,
     )
 
     if fname is not None:
