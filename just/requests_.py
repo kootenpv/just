@@ -85,12 +85,12 @@ def _retry(
                 err = None
             break
         except RequestException as e:
-            tries += 1
             print("just.requests_", kwargs["url"], "attempt", tries, str(e))
             if tries == max_retries:
                 err = ""
                 r = None
                 break
+            tries += 1
             time.sleep(delay_base ** tries)
 
     timers[domain_name] = time.time()
