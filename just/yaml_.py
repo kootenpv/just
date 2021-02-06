@@ -2,7 +2,7 @@ def read(fn):
     import yaml
 
     with open(fn) as f:
-        return yaml.load(fh, Loader=yaml.CLoader)
+        return yaml.load(f, Loader=yaml.CLoader)
 
 
 def write(obj, fn):
