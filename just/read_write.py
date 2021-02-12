@@ -11,6 +11,7 @@ EXT_TO_MODULE = {
     "html": txt,
     "py": txt,
     "txt": txt,
+    "sql": txt,
     "md": txt,
     "newl": newl,
     "json": json,
