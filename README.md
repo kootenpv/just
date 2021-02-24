@@ -44,6 +44,12 @@ just.write(some_csv, "myfile.csv")
 just.write(some_pkl, "myfile.pkl")
 ```
 
+### Compression
+
+```python
+just.write(some_json, "myfile.json.gz")
+```
+
 ### More features
 
 #### Return default structure when file does not exist:
