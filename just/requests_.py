@@ -78,6 +78,7 @@ def _retry(
 
     # retrying
     err = False
+    r = None
     while tries < max_retries:
         try:
             r = request_fn(**kwargs)
@@ -113,12 +114,12 @@ def _retry(
         r = tmp
     elif raw:
         r = r.content
-    elif "application/json" in r.headers['Content-Type']:
+    elif r is not None and "application/json" in r.headers["Content-Type"]:
         r = r.json()
     else:
         r = r.text
 
-    if use_cache:
+    if use_cache and r is not None:
         result = {"resp": r, "request_info": cache_key}
         if err:
             result["error"] = err
@@ -142,9 +143,9 @@ def get(
 ):
     caching = (use_cache, url, params)
 
-    kwargs['url'] = url
+    kwargs["url"] = url
     if params is not None:
-        kwargs['params'] = params
+        kwargs["params"] = params
 
     result = _retry(
         "get",
@@ -181,9 +182,9 @@ def post(
 ):
     caching = (use_cache, url, params, data, json)
 
-    kwargs['url'] = url
+    kwargs["url"] = url
     if params is not None:
-        kwargs['params'] = params
+        kwargs["params"] = params
     if data is not None:
         kwargs["data"] = data
     if json is not None:
