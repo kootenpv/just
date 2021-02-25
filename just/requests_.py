@@ -114,6 +114,8 @@ def _retry(
         r = tmp
     elif raw:
         r = r.content
+    elif r is None:
+        pass
     elif r is not None and "application/json" in r.headers["Content-Type"]:
         r = r.json()
     else:
