@@ -31,7 +31,7 @@ def get_likely_path():
     # try:
     # main_path = os.path.abspath(sys.modules['__main__'].__file__)
     # except AttributeError:
-    main_path = os.path.realpath('__file__')
+    main_path = os.path.realpath("__file__")
     return os.path.dirname(main_path)
 
 
@@ -126,3 +126,7 @@ def remove(file_path, no_exist=False, allow_recursive=False):
     if no_exist is not None:
         return no_exist
     raise IOError("File '{}' does not exist.".format(file_path))
+
+
+def most_recent(file_path):
+    return max(glob(file_path), key=os.path.getctime)

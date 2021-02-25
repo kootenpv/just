@@ -21,6 +21,7 @@ EXT_TO_MODULE = {
     "pickle": pickle,
     "pkl": pickle,
     "bytes": bytes_,
+    "png": bytes_,
 }
 
 EXT_TO_COMPRESSION = {}
