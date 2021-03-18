@@ -98,7 +98,8 @@ def read(fname, no_exist=None, unknown_type="RAISE", ignore_exceptions=None):
 
 
 def multi_read(star_path, no_exist=None, unknown_type="RAISE", ignore_exceptions=None):
-    return {x: read(x, no_exist, unknown_type, ignore_exceptions) for x in glob(star_path)}
+    for x in glob(star_path):
+        yield x, read(x, no_exist, unknown_type, ignore_exceptions)
 
 
 def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name, unknown_type):
