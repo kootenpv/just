@@ -97,8 +97,10 @@ def read(fname, no_exist=None, unknown_type="RAISE", ignore_exceptions=None):
     return reader(fname, no_exist, "read", unknown_type, ignore_exceptions)
 
 
-def multi_read(star_path, no_exist=None, unknown_type="RAISE", ignore_exceptions=None):
-    for x in glob(star_path):
+def multi_read(
+    star_path, no_exist=None, unknown_type="RAISE", ignore_exceptions=None, sort_reverse=False
+):
+    for x in sorted(glob(star_path), reverse=sort_reverse):
         yield x, read(x, no_exist, unknown_type, ignore_exceptions)
 
 
