@@ -48,7 +48,7 @@ def test_multi_read():
     just.multi_write(obj, fnames)
     try:
         for name, data in just.multi_read("*.txt"):
-            assert fnames.index(name) == obj.index(data)
+            assert fnames.index(name.split("/")[-1]) == obj.index(data)
     finally:
         for fname in fnames:
             os.remove(fname)
