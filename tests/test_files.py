@@ -45,6 +45,7 @@ def test_compare(m, extension, inp, expected, compare):
 def test_multi_read():
     obj = ["a", "b"]
     fnames = ["a.txt", "b.txt"]
+    just.multi_write(obj, fnames)
     try:
         for name, data in just.multi_read("*.txt"):
             assert fnames.index(name) == obj.index(data)
