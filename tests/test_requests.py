@@ -5,12 +5,15 @@ import pytest
 NOT_EXISTING_URL = "mock://stuasdfasfasdfasf.com"
 
 
-@pytest.mark.parametrize("method, output, content_type", [
-    ("GET", "mock_text", "text/html"),
-    ("GET", {"mock": "text"}, "application/json"),
-    ("POST", "mock_text", "text/html"),
-    ("POST", {"mock": "text"}, "application/json"),
-])
+@pytest.mark.parametrize(
+    "method, output, content_type",
+    [
+        ("GET", "mock_text", "text/html"),
+        ("GET", {"mock": "text"}, "application/json"),
+        ("POST", "mock_text", "text/html"),
+        ("POST", {"mock": "text"}, "application/json"),
+    ],
+)
 def test_requests(method, output, content_type):
     with requests_mock.mock() as m:
         headers = {"Content-Type": content_type}
@@ -25,4 +28,4 @@ def test_requests(method, output, content_type):
 
 
 def test_retry():
-    assert just.get(NOT_EXISTING_URL, max_retries=2, delay_base=0.01) == ""
+    assert not just.get(NOT_EXISTING_URL, max_retries=2, delay_base=0.01)
