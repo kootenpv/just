@@ -6,9 +6,9 @@ import errno
 __cached_just_path = None
 
 
-def glob(path):
+def glob(path, sort_reverse=False):
     path = make_path(path)
-    return glob2.glob(path)
+    return sorted(glob2.glob(path), reverse=sort_reverse)
 
 
 def get_just_env_path():
