@@ -5,6 +5,7 @@ import just.newl as newl
 import just.yaml_ as yaml
 import just.bytes as bytes_
 import just.pickle_ as pickle
+from just.path_ import remove
 from just import make_path, glob, mkdir
 
 EXT_TO_MODULE = {
@@ -55,6 +56,9 @@ try:
     )
 except ImportError:
     pass
+
+ZSTD_AVAILABLE = "zstd" in EXT_TO_COMPRESSION
+ROLL_EXTENSION = "zstd" if ZSTD_AVAILABLE else "gz"
 
 
 def reader(fname, no_exist, read_func_name, unknown_type, ignore_exceptions):
@@ -138,10 +142,41 @@ def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False, unknown_type="RA
 
 
 # only supported for JSON Lines so far.
+roll_counter = {}
 
 
-def append(obj, fname, mkdir_no_exist=True, skip_if_exist=False, unknown_type="RAISE"):
-    return writer(obj, fname, mkdir_no_exist, skip_if_exist, "append", unknown_type)
+def get_rolled_path(fname, roll_extension):
+    it = 0
+    dir_, base = os.path.split(fname)
+    base, *rest = base.split(".")
+    while True:
+        path = f"{dir_}/{base}_{it}.{'.'.join(rest)}.{roll_extension}"
+        if not os.path.exists(path):
+            return path
+        it += 1
+
+
+def append(
+    obj,
+    fname,
+    mkdir_no_exist=True,
+    skip_if_exist=False,
+    unknown_type="RAISE",
+    roll=0,
+    roll_extension=ROLL_EXTENSION,
+):
+    writer(obj, fname, mkdir_no_exist, skip_if_exist, "append", unknown_type)
+    if roll:
+        fname = make_path(fname)
+        if fname not in roll_counter:
+            roll_counter[fname] = 0
+        roll_counter[fname] += 1
+        if roll == roll_counter[fname]:
+            data = read(fname)
+            rolled_path = get_rolled_path(fname, roll_extension)
+            write(data, rolled_path, unknown_type=unknown_type)
+            remove(fname)
+            roll_counter[fname] = 0
 
 
 def multi_write(obj, fname, mkdir_no_exist=True, skip_if_exist=False):

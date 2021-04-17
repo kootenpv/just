@@ -1,4 +1,7 @@
-import zstd
+try:
+    import zstandard as zstd
+except ImportError:
+    import zstd
 
 
 class ZstdFile(object):
