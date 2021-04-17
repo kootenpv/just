@@ -104,7 +104,7 @@ def read(fname, no_exist=None, unknown_type="RAISE", ignore_exceptions=None):
 def multi_read(
     star_path, no_exist=None, unknown_type="RAISE", ignore_exceptions=None, sort_reverse=False
 ):
-    for x in glob(star_path, reverse=sort_reverse):
+    for x in glob(star_path, sort_reverse=sort_reverse):
         yield x, read(x, no_exist, unknown_type, ignore_exceptions)
 
 
