@@ -12,6 +12,7 @@ EXT_TO_MODULE = {
     "html": txt,
     "py": txt,
     "txt": txt,
+    "log": txt,
     "sql": txt,
     "md": txt,
     "newl": newl,
@@ -51,9 +52,7 @@ except ImportError:
 try:
     import just.zstd_ as zstd
 
-    EXT_TO_COMPRESSION.update(
-        {"zstd": zstd.ZstdFile, "zst": zstd.ZstdFile, "zstandard": zstd.ZstdFile}
-    )
+    EXT_TO_COMPRESSION.update({"zstd": zstd.ZstdFile, "zst": zstd.ZstdFile, "zstandard": zstd.ZstdFile})
 except ImportError:
     pass
 
@@ -101,9 +100,7 @@ def read(fname, no_exist=None, unknown_type="RAISE", ignore_exceptions=None):
     return reader(fname, no_exist, "read", unknown_type, ignore_exceptions)
 
 
-def multi_read(
-    star_path, no_exist=None, unknown_type="RAISE", ignore_exceptions=None, sort_reverse=False
-):
+def multi_read(star_path, no_exist=None, unknown_type="RAISE", ignore_exceptions=None, sort_reverse=False):
     for x in glob(star_path, sort_reverse=sort_reverse):
         yield x, read(x, no_exist, unknown_type, ignore_exceptions)
 

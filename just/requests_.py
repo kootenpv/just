@@ -1,14 +1,56 @@
+import os
 import time
+import warnings
 import hashlib
 from just.dir import mkdir
-from just.path_ import exists, remove
+from just.path_ import exists, glob, make_path, remove, rename
 from just.read_write import write, read
 
 session = None
+PER_FOLDER = 3000
 
 caches = {}
 timers = {}
 sessions = {}
+last_cache_fname = {}
+
+obj_counts = {}
+
+
+def get_domain(url):
+    return url.split("/")[2].split("?")[0].replace("www.", "")
+
+
+def delete_from_cache(url, cache_key=None, compression=".gz"):
+    domain_name = get_domain(url)
+    if cache_key is not None:
+        fname = get_cache_file_name_str(domain_name, cache_key, compression)
+        parts = fname.split()
+        parts[-2] = "*"
+        fname = glob("/".join(parts))[0]
+    else:
+        fname = last_cache_fname[domain_name]
+    remove(fname)
+    return fname
+
+
+def update_obj_count(dir_name, obj_type):
+    if obj_type in obj_counts:
+        obj_counts[obj_type] += 1
+    else:
+        dir_name = make_path(dir_name)
+        try:
+            existing_partitions = glob(make_path(dir_name) + "/*")
+            if existing_partitions:
+                latest_folder = max(existing_partitions)
+                base = int(latest_folder.split("/")[-1]) * PER_FOLDER
+                count = base + len(os.listdir(latest_folder))
+            else:
+                count = 0
+        except FileNotFoundError:
+            count = 0
+        obj_counts[obj_type] = count
+    return obj_counts[obj_type]
 
 
 def get_cache_file_name(domain, request_info, compression=".gz"):
@@ -18,10 +60,24 @@ def get_cache_file_name(domain, request_info, compression=".gz"):
     m = hashlib.md5()
     m.update(key.encode("utf8"))
     md5 = m.hexdigest()
-    dir_name, f_name = md5[:3], md5[3:]
+    dir_name, fname = md5[:3], md5[3:]
     if not compression:
         compression = ""
-    return f"~/.just_requests/{domain}/{dir_name}/{f_name}.json{compression}"
+    return f"~/.just_requests/{domain}/{dir_name}/{fname}.json{compression}"
+
+
+def get_cache_file_name_str(domain, cache_key, compression=".gz"):
+    if "/" in cache_key:
+        obj_type, fname = cache_key.split("/")
+    else:
+        obj_type, fname = "", cache_key
+    if obj_type:
+        obj_type = "/" + obj_type
+    initial_part = f"~/.just_requests/{domain}{obj_type}"
+    partition = update_obj_count(initial_part, obj_type) // PER_FOLDER
+    if not compression:
+        compression = ""
+    return f"{initial_part}/{partition}/{fname}.json{compression}"
 
 
 def _retry(
@@ -41,16 +97,29 @@ def _retry(
 
     tries = 0
     url = kwargs["url"]
-    domain_name = url.split("/")[2].split("?")[0].replace("www.", "")
+    domain_name = get_domain(url)
 
-    use_cache, *cache_key = caching
+    use_cache, *request_info = caching
 
-    cache_file_name = get_cache_file_name(domain_name, cache_key, cache_compression)
+    if isinstance(use_cache, bool):
+        cache_file_name = get_cache_file_name(domain_name, request_info, cache_compression)
+    else:
+        if isinstance(use_cache, int):
+            use_cache = str(use_cache)
+        cache_file_name = get_cache_file_name_str(domain_name, use_cache, cache_compression)
+
+    if isinstance(use_cache, str):
+        old_file_name = get_cache_file_name(domain_name, request_info, cache_compression)
+        if exists(old_file_name):
+            mkdir("/".join(cache_file_name.split("/")[:-1]))
+            print("renaming existing to", cache_file_name)
+            rename(old_file_name, cache_file_name)
 
     if exists(cache_file_name):
         if not use_cache:
             remove(cache_file_name)
         else:
+            last_cache_fname[domain_name] = cache_file_name
             return read(cache_file_name)["resp"]
 
     if "timeout" not in kwargs:
@@ -122,7 +191,7 @@ def _retry(
         r = r.text
 
     if use_cache and r is not None:
-        result = {"resp": r, "request_info": cache_key}
+        result = {"resp": r, "request_info": request_info, "response_ts": time.time()}
         if err:
             result["error"] = err
         write(result, cache_file_name)
@@ -167,6 +236,14 @@ def get(
     return result
 
 
+def warn_cache():
+    warnings.warn(
+        "This attribute is deprecated as boolean, it still works but advised to make a str key",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
+
 def post(
     url,
     params=None,
@@ -182,6 +259,9 @@ def post(
     reuse_session=True,
     **kwargs,
 ):
+    if isinstance(use_cache, bool):
+        warn_cache()
+
     caching = (use_cache, url, params, data, json)
 
     kwargs["url"] = url

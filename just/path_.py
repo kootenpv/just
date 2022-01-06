@@ -62,11 +62,12 @@ def exists(fname):
     return os.path.isfile(make_path(fname))
 
 
-def rename(fname, extension, no_exist=None):
-    fname = make_path(fname)
-    if not os.path.isfile(fname) and no_exist is not None:
+def rename(src, dest, no_exist=None):
+    src = make_path(src)
+    dest = make_path(dest)
+    if not os.path.isfile(src) and no_exist is not None:
         return False
-    os.rename(fname, fname + "." + extension)
+    os.rename(src, dest)
     return True
 
 
