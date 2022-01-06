@@ -2,6 +2,8 @@ import os
 import time
 import warnings
 import hashlib
+from collections import defaultdict
+
 from just.dir import mkdir
 from just.path_ import exists, glob, make_path, remove, rename
 from just.read_write import write, read
@@ -14,7 +16,7 @@ timers = {}
 sessions = {}
 last_cache_fname = {}
 
-obj_counts = {}
+obj_counts = defaultdict(int)
 
 
 def get_domain(url):
@@ -34,10 +36,8 @@ def delete_from_cache(url, cache_key=None, compression=".gz"):
     return fname
 
 
-def update_obj_count(dir_name, obj_type):
-    if obj_type in obj_counts:
-        obj_counts[obj_type] += 1
-    else:
+def update_obj_count(domain, dir_name, obj_type):
+    if obj_type not in obj_counts:
         dir_name = make_path(dir_name)
         try:
             existing_partitions = glob(make_path(dir_name) + "/*")
@@ -49,8 +49,8 @@ def update_obj_count(dir_name, obj_type):
                 count = 0
         except FileNotFoundError:
             count = 0
-        obj_counts[obj_type] = count
-    return obj_counts[obj_type]
+        obj_counts[(domain, obj_type)] = count
+    return obj_counts[(domain, obj_type)]
 
 
 def get_cache_file_name(domain, request_info, compression=".gz"):
@@ -66,18 +66,37 @@ def get_cache_file_name(domain, request_info, compression=".gz"):
     return f"~/.just_requests/{domain}/{dir_name}/{fname}.json{compression}"
 
 
-def get_cache_file_name_str(domain, cache_key, compression=".gz"):
-    if "/" in cache_key:
-        obj_type, fname = cache_key.split("/")
+def get_obj_type(cache_key):
+    if isinstance(cache_key, bool):
+        obj_type, fname = "", ""
     else:
-        obj_type, fname = "", cache_key
-    if obj_type:
-        obj_type = "/" + obj_type
+        if "/" in cache_key:
+            obj_type, fname = cache_key.split("/")
+        else:
+            obj_type, fname = "", cache_key
+        if obj_type:
+            obj_type = "/" + obj_type
+    return obj_type, fname
+
+
+def get_cache_file_name_str(domain, cache_key, compression=".gz"):
+    obj_type, fname = get_obj_type(cache_key)
     initial_part = f"~/.just_requests/{domain}{obj_type}"
-    partition = update_obj_count(initial_part, obj_type) // PER_FOLDER
+    partition = update_obj_count(domain, initial_part, obj_type) // PER_FOLDER
     if not compression:
         compression = ""
     return f"{initial_part}/{partition}/{fname}.json{compression}"
+
+
+def from_cache(url, cache_key, paths_only=False, compression=".gz"):
+    domain = get_domain(url)
+    obj_type, fname = get_obj_type(cache_key)
+    initial_part = f"~/.just_requests/{domain}{obj_type}"
+    partition = "*"
+    paths = glob(f"{initial_part}/{partition}/{fname}.json{compression}")
+    if paths_only:
+        return paths
+    return [read(x)["resp"] for x in paths]
 
 
 def _retry(
@@ -195,6 +214,8 @@ def _retry(
         if err:
             result["error"] = err
         write(result, cache_file_name)
+        obj_type, _ = get_obj_type(use_cache)
+        obj_counts[(domain_name, obj_type)] += 1
 
     return r
 
@@ -234,6 +255,9 @@ def get(
         write(result, fname)
 
     return result
+
+
+get.from_cache = from_cache
 
 
 def warn_cache():
@@ -288,6 +312,9 @@ def post(
         write(result, fname)
 
     return result
+
+
+post.from_cache = from_cache
 
 
 def get_tree(*args, **kwargs):
