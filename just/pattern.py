@@ -1,9 +1,14 @@
 import re
 from dateutil.parser import parse
+from datetime import datetime
 
 
 def parse_specials(special_str):
     return [x.split(":") if ":" in x else (x, None) for x in special_str.split(",")]
+
+
+def iso(x):
+    return datetime.fromisoformat(x.replace(",", ".").replace("Z", "+00:00"))
 
 
 def convert_str(format_str, names):
@@ -53,8 +58,10 @@ def convert_str(format_str, names):
                 r += re.escape(x)
             else:
                 tmp += x
-    r = r[:last]
     return r, types, captured_names
+
+
+NUMERIC = {int, float}
 
 
 class Pattern:
@@ -72,10 +79,16 @@ class Pattern:
         res = self.r.search(line)
         if not res:
             return None
-        return self.type(res.groups()[0])
+        return self.type(res.groups()[0].strip())
 
     def finder_multi(self, line):
         res = self.r.search(line)
         if not res:
+            return [None] * self.r.groups
+        return [tp(x.strip()) for tp, x in zip(self.types, res.groups())]
+
+    def find_dict(self, line):
+        res = self.find(line)
+        if res[0] is None:
             return None
-        return [tp(x) for tp, x in zip(self.types, res.groups())]
+        return {k: v for k, v in zip(self.names, res) if isinstance(k, int) or not k.startswith("_")}

@@ -37,7 +37,7 @@ def delete_from_cache(url, cache_key=None, compression=".gz"):
 
 
 def update_obj_count(domain, dir_name, obj_type):
-    if obj_type not in obj_counts:
+    if (domain, obj_type) not in obj_counts:
         dir_name = make_path(dir_name)
         try:
             existing_partitions = glob(make_path(dir_name) + "/*")

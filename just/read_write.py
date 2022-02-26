@@ -7,6 +7,7 @@ import just.bytes as bytes_
 import just.pickle_ as pickle
 from just.path_ import remove
 from just import make_path, glob, mkdir
+import lxml.html
 
 EXT_TO_MODULE = {
     "html": txt,
@@ -188,3 +189,7 @@ def iread(fname, no_exist=None, unknown_type="RAISE", ignore_exceptions=None):
 
 def iwrite(obj, fname, mkdir_no_exist=True, skip_if_exist=False, unknown_type="RAISE"):
     return writer(obj, fname, mkdir_no_exist, skip_if_exist, "iwrite", unknown_type)
+
+
+def read_tree(fname):
+    return lxml.html.fromstring(read(fname, unknown_type="html"))

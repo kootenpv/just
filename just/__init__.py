@@ -32,4 +32,4 @@ from just.pattern import Pattern
 # In [20]: with lzma.open("fuck.xz") as f: hh=f.read()
 
 __project__ = "just"
-__version__ = "0.8.137"
+__version__ = "0.8.138"
