@@ -3,7 +3,7 @@ from setuptools import setup
 
 MAJOR_VERSION = "0"
 MINOR_VERSION = "8"
-MICRO_VERSION = "141"
+MICRO_VERSION = "142"
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(
@@ -22,6 +22,7 @@ setup(
         "preconvert_numpy",
         "requests",
         "python-dateutil",
+        "lxml",
     ],
     entry_points={"console_scripts": ["just = just.__main__:main"]},
     classifiers=[
