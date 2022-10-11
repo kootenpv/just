@@ -145,8 +145,8 @@ def _retry(
     session_key = (domain_name, local_address, remote_ip)
     if reuse_session:
         t1 = time.time()
-        expired = False
-        if session_key not in sessions or (expired := sessions[session_key][1] + 300 < t1):
+        expired = sessions[session_key][1] + 300 < t1 if session_key in sessions else False
+        if session_key not in sessions or expired:
             session = Session()
             if local_address is not None:
                 session.mount("http://", SourceAddressAdapter(local_address))
