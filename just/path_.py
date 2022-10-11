@@ -65,6 +65,11 @@ def exists(fname):
 def rename(src, dest, no_exist=None):
     src = make_path(src)
     dest = make_path(dest)
+    if not dest.endswith("/"):
+        *dest_folder_parts, filename = dest.split("/")
+        dest_folder = "/".join(dest_folder_parts)
+        if not os.path.exists(dest_folder) and "." in filename:
+            os.makedirs(dest_folder)
     if not os.path.isfile(src) and no_exist is not None:
         return False
     os.rename(src, dest)

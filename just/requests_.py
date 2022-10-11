@@ -7,6 +7,9 @@ from collections import defaultdict
 from just.dir import mkdir
 from just.path_ import exists, glob, make_path, remove, rename
 from just.read_write import write, read
+from just.forcedip import ForcedIPHTTPSAdapter
+from just.source_ip import SourceAddressAdapter
+
 
 session = None
 PER_FOLDER = 3000
@@ -108,6 +111,8 @@ def _retry(
     cache_compression,
     sleep_time,
     reuse_session,
+    local_address,
+    remote_ip,
     kwargs,
 ):
     import requests
@@ -120,26 +125,15 @@ def _retry(
 
     use_cache, *request_info = caching
 
-    if isinstance(use_cache, bool):
-        cache_file_name = get_cache_file_name(domain_name, request_info, cache_compression)
-    else:
-        if isinstance(use_cache, int):
-            use_cache = str(use_cache)
-        cache_file_name = get_cache_file_name_str(domain_name, use_cache, cache_compression)
-
-    if isinstance(use_cache, str):
-        old_file_name = get_cache_file_name(domain_name, request_info, cache_compression)
-        if exists(old_file_name):
-            mkdir("/".join(cache_file_name.split("/")[:-1]))
-            print("renaming existing to", cache_file_name)
-            rename(old_file_name, cache_file_name)
+    cache_file_name = get_cache_file_name(domain_name, request_info, cache_compression)
 
     if exists(cache_file_name):
-        if not use_cache:
-            remove(cache_file_name)
-        else:
+        if use_cache:
             last_cache_fname[domain_name] = cache_file_name
             return read(cache_file_name)["resp"]
+        if use_cache is None:
+            use_cache = True
+        remove(cache_file_name)
 
     if "timeout" not in kwargs:
         kwargs["timeout"] = delay_base
@@ -148,18 +142,30 @@ def _retry(
     if isinstance(cookies, dict):
         kwargs["cookies"] = cookiejar_from_dict(cookies)
 
+    session_key = (domain_name, local_address, remote_ip)
     if reuse_session:
-        if domain_name not in sessions:
-            sessions[domain_name] = Session()
+        t1 = time.time()
+        expired = False
+        if session_key not in sessions or (expired := sessions[session_key][1] + 300 < t1):
+            session = Session()
+            if local_address is not None:
+                session.mount("http://", SourceAddressAdapter(local_address))
+                session.mount("https://", SourceAddressAdapter(local_address))
+            if remote_ip is not None:
+                session.mount(f"https://{domain_name}", ForcedIPHTTPSAdapter(dest_ip=remote_ip))
+            sessions[session_key] = [session, t1]
+
+        if expired:
+            print("just.requests_", kwargs["url"], "old session")
 
         # e.g. GET or POST
-        request_fn = getattr(sessions[domain_name], method)
+        request_fn = getattr(sessions[session_key][0], method)
     else:
         request_fn = getattr(requests, method)
 
-    if sleep_time and domain_name in timers:
+    if sleep_time and session_key in timers:
         # 1200 - 1201 + 3
-        diff = timers[domain_name] - time.time() + sleep_time
+        diff = timers[session_key] - time.time() + sleep_time
 
         if diff > 0:
             time.sleep(diff)
@@ -170,6 +176,9 @@ def _retry(
     while tries < max_retries:
         try:
             r = request_fn(**kwargs)
+            # update session age
+            if reuse_session:
+                sessions[session_key][1] = time.time()
             if r.status_code > 399:
                 err = None
             break
@@ -180,9 +189,9 @@ def _retry(
                 r = None
                 break
             tries += 1
-            time.sleep(delay_base ** tries)
+            time.sleep(delay_base**tries)
 
-    timers[domain_name] = time.time()
+    timers[session_key] = time.time()
 
     # result handling
     if err is None or err == "":
@@ -223,7 +232,7 @@ def _retry(
 def get(
     url,
     params=None,
-    max_retries=1,
+    max_retries=2,
     delay_base=3,
     raw=False,
     use_cache=False,
@@ -231,6 +240,8 @@ def get(
     sleep_time=None,
     fname=None,
     reuse_session=True,
+    local_address=None,
+    remote_ip=None,
     **kwargs,
 ):
     caching = (use_cache, url, params)
@@ -248,6 +259,8 @@ def get(
         cache_compression,
         sleep_time,
         reuse_session,
+        local_address,
+        remote_ip,
         kwargs,
     )
 
@@ -281,6 +294,8 @@ def post(
     sleep_time=None,
     fname=None,
     reuse_session=True,
+    local_address=None,
+    remote_ip=None,
     **kwargs,
 ):
     if isinstance(use_cache, bool):
@@ -305,6 +320,8 @@ def post(
         cache_compression,
         sleep_time,
         reuse_session,
+        local_address,
+        remote_ip,
         kwargs,
     )
 
@@ -321,6 +338,12 @@ def get_tree(*args, **kwargs):
     import lxml.html
 
     return lxml.html.fromstring(get(*args, **kwargs))
+
+
+def post_tree(*args, **kwargs):
+    import lxml.html
+
+    return lxml.html.fromstring(post(*args, **kwargs))
 
 
 def save_session(name, session):

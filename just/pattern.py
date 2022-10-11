@@ -1,17 +1,22 @@
 import re
-from dateutil.parser import parse
+from dateutil.parser import parse, isoparse
 from datetime import datetime
+from just import iread
 
 
 def parse_specials(special_str):
-    return [x.split(":") if ":" in x else (x, None) for x in special_str.split(",")]
+    if not special_str:
+        return "", "str"
+    if "@" not in special_str:
+        return special_str, ""
+    return special_str.split("@")
 
 
 def iso(x):
     return datetime.fromisoformat(x.replace(",", ".").replace("Z", "+00:00"))
 
 
-def convert_str(format_str, names):
+def convert_str(format_str):
     r = ""
     on = False
     specials = []
@@ -23,31 +28,20 @@ def convert_str(format_str, names):
     for i, x in enumerate(format_str):
         if x == "}":
             on = False
-            tp = str
-            capture = True
-            fw = False
-            for name, value in parse_specials(tmp):
-                if name == "cast":
-                    tp = eval(value)
-                elif name == "drop":
-                    capture = False
-                elif name == "fw":
-                    fw = True
-                elif name == "":
-                    pass
-                else:
-                    raise ValueError("unknown")
-            if fw:
-                pat = ".{4}"
-            elif i + 1 == lenm:
+            # fw = False
+            name, cast = parse_specials(tmp)
+            capture = bool(name)
+            tp = eval(cast) if cast else str
+            # if fw:
+            #     pat = ".{4}"
+            if i + 1 == lenm:
                 pat = ".+"
             else:
                 pat = f"[^{format_str[i+1]}]+"
-            capture_name = names.pop(0) if names is not None else len(captured_names)
             if capture:
-                types.append(tp)
                 pat = f"({pat})"
-                captured_names.append(capture_name)
+                captured_names.append(name)
+                types.append(tp)
             r += pat
             tmp = ""
             last = len(r)
@@ -65,15 +59,16 @@ NUMERIC = {int, float}
 
 
 class Pattern:
-    def __init__(self, format_str, names=None):
+    def __init__(self, format_str):
         self.format_str = format_str
-        self.pattern, self.types, self.names = convert_str(format_str, names)
+        self.pattern, self.types, self.names = convert_str(format_str)
         if len(self.types) == 1:
             self.type = self.types[0]
             self.find = self.finder_one
         else:
             self.find = self.finder_multi
         self.r = re.compile(self.pattern)
+        self.num_captures_vars = len([x for x in self.names if x])
 
     def finder_one(self, line):
         res = self.r.search(line)
@@ -84,11 +79,14 @@ class Pattern:
     def finder_multi(self, line):
         res = self.r.search(line)
         if not res:
-            return [None] * self.r.groups
-        return [tp(x.strip()) for tp, x in zip(self.types, res.groups())]
+            return [None] * self.num_captures_vars
+        return [tp(x.strip()) for name, tp, x in zip(self.names, self.types, res.groups()) if name]
 
     def find_dict(self, line):
-        res = self.find(line)
+        res = self.finder_multi(line)
         if res[0] is None:
             return None
-        return {k: v for k, v in zip(self.names, res) if isinstance(k, int) or not k.startswith("_")}
+        return {k: v for k, v in zip(self.names, res) if isinstance(k, int) or not k.startswith("_") and k}
+
+    def stream(self, fname):
+        return [self.find_dict(x) for x in iread(fname)]
