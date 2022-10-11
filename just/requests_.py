@@ -22,7 +22,7 @@ last_cache_fname = {}
 obj_counts = defaultdict(int)
 
 
-def get_domain(url):
+def get_domain(url) -> str:
     return url.split("/")[2].split("?")[0].replace("www.", "")
 
 
