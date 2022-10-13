@@ -1,5 +1,5 @@
 import re
-from dateutil.parser import parse, isoparse
+from ciso8601 import parse_datetime as isoparse
 from datetime import datetime
 from just import iread
 
