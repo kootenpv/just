@@ -3,7 +3,7 @@ from setuptools import setup
 
 MAJOR_VERSION = "0"
 MINOR_VERSION = "8"
-MICRO_VERSION = "142"
+MICRO_VERSION = "145"
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(
@@ -16,11 +16,11 @@ setup(
     install_requires=[
         "pyyaml",
         "glob2",
-        "dill",
-        "jsonpath_rw",
+        # "dill",
+        # "jsonpath_rw",
         "orjson",
         "requests",
-        "python-dateutil",
+        "ciso8601",
         "lxml",
     ],
     entry_points={"console_scripts": ["just = just.__main__:main"]},
