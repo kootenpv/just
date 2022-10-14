@@ -3,7 +3,7 @@ from setuptools import setup
 
 MAJOR_VERSION = "0"
 MINOR_VERSION = "8"
-MICRO_VERSION = "145"
+MICRO_VERSION = "146"
 VERSION = "{}.{}.{}".format(MAJOR_VERSION, MINOR_VERSION, MICRO_VERSION)
 
 setup(
@@ -20,6 +20,7 @@ setup(
         # "jsonpath_rw",
         "orjson",
         "requests",
+        "requests_viewer",
         "ciso8601",
         "lxml",
     ],

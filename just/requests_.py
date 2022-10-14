@@ -4,6 +4,8 @@ import warnings
 import hashlib
 from collections import defaultdict
 
+import requests_viewer  # to extend trees with `view`
+
 from just.dir import mkdir
 from just.path_ import exists, glob, make_path, remove, rename
 from just.read_write import write, read
