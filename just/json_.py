@@ -63,12 +63,14 @@ def append(obj, fn):
         f.write(orjson.dumps(obj).decode() + "\n")
 
 
-def write(obj, fn):
+def write(obj, fn, option=orjson.OPT_INDENT_2):
+    if not isinstance(obj, bytes):
+        obj = orjson.dumps(obj, option=option)
     if not isinstance(fn, str):
-        fn.write(orjson.dumps(obj).decode(), option=orjson.OPT_INDENT_2)
+        fn.write(obj)
     else:
         with open(fn, "w") as f:
-            f.write(orjson.dumps(obj, option=orjson.OPT_INDENT_2).decode())
+            f.write(obj.decode())
 
 
 def iread(fn):

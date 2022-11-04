@@ -106,6 +106,11 @@ def multi_read(star_path, no_exist=None, unknown_type="RAISE", ignore_exceptions
         yield x, read(x, no_exist, unknown_type, ignore_exceptions)
 
 
+def multi_read_tree(star_path, no_exist=None, unknown_type="html", ignore_exceptions=None, sort_reverse=False):
+    for x in glob(star_path, sort_reverse=sort_reverse):
+        yield x, read_tree(x, no_exist, unknown_type, ignore_exceptions)
+
+
 def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name, unknown_type):
     fname = make_path(fname)
     if skip_if_exist and os.path.isfile(fname):  # pragma: no cover
@@ -191,5 +196,5 @@ def iwrite(obj, fname, mkdir_no_exist=True, skip_if_exist=False, unknown_type="R
     return writer(obj, fname, mkdir_no_exist, skip_if_exist, "iwrite", unknown_type)
 
 
-def read_tree(fname):
-    return lxml.html.fromstring(read(fname, unknown_type="html"))
+def read_tree(fname, no_exist=None, unknown_type="html", ignore_exceptions=None):
+    return lxml.html.fromstring(read(fname, no_exist, unknown_type, ignore_exceptions))

@@ -2,6 +2,7 @@ import inspect
 import os
 import glob2
 import errno
+import functools
 
 __cached_just_path = None
 
@@ -47,6 +48,7 @@ def get_just_path():
     return just_path
 
 
+@functools.lru_cache(maxsize=1_000_000)
 def make_path(filename):
     just_path = get_just_path()
     if not isinstance(filename, (str, bytes)):

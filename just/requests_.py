@@ -23,6 +23,8 @@ last_cache_fname = {}
 
 obj_counts = defaultdict(int)
 
+USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36"
+
 
 def get_domain(url) -> str:
     return url.split("/")[2].split("?")[0].replace("www.", "")
@@ -244,6 +246,7 @@ def get(
     reuse_session=True,
     local_address=None,
     remote_ip=None,
+    user_agent=USER_AGENT,
     **kwargs,
 ):
     caching = (use_cache, url, params)
@@ -251,6 +254,11 @@ def get(
     kwargs["url"] = url
     if params is not None:
         kwargs["params"] = params
+    if user_agent:
+        if "headers" not in kwargs:
+            kwargs["headers"] = {}
+        if "User-Agent" not in kwargs["headers"]:
+            kwargs["headers"]["User-Agent"] = user_agent
 
     result = _retry(
         "get",
@@ -298,6 +306,7 @@ def post(
     reuse_session=True,
     local_address=None,
     remote_ip=None,
+    user_agent=USER_AGENT,
     **kwargs,
 ):
     if isinstance(use_cache, bool):
@@ -312,7 +321,11 @@ def post(
         kwargs["data"] = data
     if json is not None:
         kwargs["json"] = json
-
+    if user_agent:
+        if "headers" not in kwargs:
+            kwargs["headers"] = {}
+        if "User-Agent" not in kwargs["headers"]:
+            kwargs["headers"]["User-Agent"] = user_agent
     result = _retry(
         "post",
         max_retries,
