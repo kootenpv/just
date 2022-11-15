@@ -4,6 +4,7 @@ import warnings
 import hashlib
 from collections import defaultdict
 
+import requests
 import requests_viewer  # to extend trees with `view`
 
 from just.dir import mkdir
@@ -106,6 +107,28 @@ def from_cache(url, cache_key, paths_only=False, compression=".gz"):
     return [read(x)["resp"] for x in paths]
 
 
+def get_session_method(reuse_session, session_key, remote_ip, method, url):
+    if reuse_session:
+        domain_name, local_address = session_key
+        t1 = time.time()
+        expired = sessions[session_key][1] + 300 < t1 if session_key in sessions else False
+        if session_key not in sessions or expired:
+            session = requests.Session()
+            if local_address is not None:
+                session.mount("http://", SourceAddressAdapter(local_address))
+                session.mount("https://", SourceAddressAdapter(local_address))
+            if remote_ip is not None:
+                session.mount(f"https://{domain_name}", ForcedIPHTTPSAdapter(dest_ip=remote_ip))
+            sessions[session_key] = [session, t1]
+        if expired:
+            print("just.requests_", url, "old session")
+        # e.g. GET or POST
+        request_fn = getattr(sessions[session_key][0], method)
+    else:
+        request_fn = getattr(requests, method)
+    return request_fn
+
+
 def _retry(
     method,
     max_retries,
@@ -147,25 +170,7 @@ def _retry(
         kwargs["cookies"] = cookiejar_from_dict(cookies)
 
     session_key = (domain_name, local_address)
-    if reuse_session:
-        t1 = time.time()
-        expired = sessions[session_key][1] + 300 < t1 if session_key in sessions else False
-        if session_key not in sessions or expired:
-            session = Session()
-            if local_address is not None:
-                session.mount("http://", SourceAddressAdapter(local_address))
-                session.mount("https://", SourceAddressAdapter(local_address))
-            if remote_ip is not None:
-                session.mount(f"https://{domain_name}", ForcedIPHTTPSAdapter(dest_ip=remote_ip))
-            sessions[session_key] = [session, t1]
-
-        if expired:
-            print("just.requests_", kwargs["url"], "old session")
-
-        # e.g. GET or POST
-        request_fn = getattr(sessions[session_key][0], method)
-    else:
-        request_fn = getattr(requests, method)
+    request_fn = get_session_method(reuse_session, session_key, remote_ip, method, kwargs["url"])
 
     if sleep_time and session_key in timers:
         # 1200 - 1201 + 3
@@ -185,6 +190,7 @@ def _retry(
                 sessions[session_key][1] = time.time()
             if r.status_code > 399:
                 err = None
+                request_fn = get_session_method(reuse_session, session_key, remote_ip, method, kwargs["url"])
             break
         except RequestException as e:
             print("just.requests_", kwargs["url"], "attempt", tries, str(e))
@@ -192,6 +198,8 @@ def _retry(
                 err = ""
                 r = None
                 break
+            else:
+                request_fn = get_session_method(reuse_session, session_key, remote_ip, method, kwargs["url"])
             tries += 1
             time.sleep(delay_base**tries)
 
@@ -328,7 +336,7 @@ def post(
     if user_agent:
         if "headers" not in kwargs:
             kwargs["headers"] = {}
-        if "User-Agent" not in kwargs["headers"]:
+        if "User-Agent" not in kwargs["headers"] and "user-agent" not in kwargs["headers"]:
             kwargs["headers"]["User-Agent"] = user_agent
     result = _retry(
         "post",
