@@ -7,6 +7,17 @@ import json
 parse_knowledge = defaultdict(lambda: (0, 0))
 
 
+def default(obj):
+    if isinstance(obj, set):
+        return list(obj)
+    tp = str(type(obj))
+    if ".float" in tp:
+        return float(obj)
+    if ".int" in tp:
+        return int(obj)
+    raise TypeError
+
+
 def handle_str_value(path, v):
     hits, total = parse_knowledge[path]
     if total == 5:
@@ -60,12 +71,12 @@ def append(obj, fn):
     if not isinstance(fn, str):
         raise TypeError("Cannot append to compression")
     with open(fn, "a+") as f:
-        f.write(orjson.dumps(obj).decode() + "\n")
+        f.write(orjson.dumps(obj, default=default).decode() + "\n")
 
 
 def write(obj, fn, option=orjson.OPT_INDENT_2):
     if not isinstance(obj, bytes):
-        obj = orjson.dumps(obj, option=option)
+        obj = orjson.dumps(obj, option=option, default=default)
     if not isinstance(fn, str):
         fn.write(obj)
     else:
@@ -93,4 +104,4 @@ def iwrite(obj, fn):
         raise TypeError("Cannot iteratively write compressed")
     with open(fn, "w") as f:
         for chunk in obj:
-            f.write(orjson.dumps(chunk).decode() + "\n")
+            f.write(orjson.dumps(chunk, default=default).decode() + "\n")

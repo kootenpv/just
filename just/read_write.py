@@ -98,6 +98,8 @@ def reader(fname, no_exist, read_func_name, unknown_type, ignore_exceptions):
 
 
 def read(fname, no_exist=None, unknown_type="RAISE", ignore_exceptions=None):
+    if "*" in fname:
+        raise ValueError(f"* cannot be in fname for normal read: {fname}")
     return reader(fname, no_exist, "read", unknown_type, ignore_exceptions)
 
 

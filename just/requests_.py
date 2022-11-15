@@ -217,7 +217,11 @@ def _retry(
         r = r.content
     elif r is None:
         pass
-    elif r is not None and "application/json" in r.headers["Content-Type"]:
+    elif (
+        r is not None
+        and r.headers
+        and "application/json" in (r.headers.get("Content-Type", r.headers.get("content-type")) or "")
+    ):
         r = r.json()
     else:
         r = r.text
@@ -344,6 +348,16 @@ def post(
         write(result, fname)
 
     return result
+
+
+def request(**kwargs):
+    return {"get": get, "post": post}[kwargs.pop("method")](**kwargs)
+
+
+def request_tree(*args, **kwargs):
+    import lxml.html
+
+    return lxml.html.fromstring(request(*args, **kwargs))
 
 
 post.from_cache = from_cache
