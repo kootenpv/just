@@ -225,11 +225,7 @@ def _retry(
         r = r.content
     elif r is None:
         pass
-    elif (
-        r is not None
-        and r.headers
-        and "application/json" in (r.headers.get("Content-Type", r.headers.get("content-type")) or "")
-    ):
+    elif r is not None and r.headers and "json" in (r.headers.get("Content-Type", r.headers.get("content-type")) or ""):
         r = r.json()
     else:
         r = r.text
