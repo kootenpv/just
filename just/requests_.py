@@ -140,6 +140,7 @@ def _retry(
     reuse_session,
     local_address,
     remote_ip,
+    refresh_session_on_error,
     kwargs,
 ):
     import requests
@@ -190,7 +191,8 @@ def _retry(
                 sessions[session_key][1] = time.time()
             if r.status_code > 399:
                 err = None
-                request_fn = get_session_method(reuse_session, session_key, remote_ip, method, kwargs["url"])
+                if refresh_session_on_error:
+                    request_fn = get_session_method(reuse_session, session_key, remote_ip, method, kwargs["url"])
             break
         except RequestException as e:
             print("just.requests_", kwargs["url"], "attempt", tries, str(e))
@@ -199,7 +201,8 @@ def _retry(
                 r = None
                 break
             else:
-                request_fn = get_session_method(reuse_session, session_key, remote_ip, method, kwargs["url"])
+                if refresh_session_on_error:
+                    request_fn = get_session_method(reuse_session, session_key, remote_ip, method, kwargs["url"])
             tries += 1
             time.sleep(delay_base**tries)
 
@@ -254,6 +257,7 @@ def get(
     reuse_session=True,
     local_address=None,
     remote_ip=None,
+    refresh_session_on_error=False,
     user_agent=USER_AGENT,
     **kwargs,
 ):
@@ -279,6 +283,7 @@ def get(
         reuse_session,
         local_address,
         remote_ip,
+        refresh_session_on_error,
         kwargs,
     )
 
@@ -314,6 +319,7 @@ def post(
     reuse_session=True,
     local_address=None,
     remote_ip=None,
+    refresh_session_on_error=False,
     user_agent=USER_AGENT,
     **kwargs,
 ):
@@ -345,6 +351,7 @@ def post(
         reuse_session,
         local_address,
         remote_ip,
+        refresh_session_on_error,
         kwargs,
     )
 
