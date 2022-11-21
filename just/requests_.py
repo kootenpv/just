@@ -3,6 +3,7 @@ import time
 import warnings
 import hashlib
 from collections import defaultdict
+from urllib.parse import urlparse
 
 import requests
 import requests_viewer  # to extend trees with `view`
@@ -16,6 +17,7 @@ from just.source_ip import SourceAddressAdapter
 
 session = None
 PER_FOLDER = 3000
+BINARY_EXTENSIONS = {"jpg", "png", "jpeg", "png"}
 
 caches = {}
 timers = {}
@@ -129,6 +131,15 @@ def get_session_method(reuse_session, session_key, remote_ip, method, url):
     return request_fn
 
 
+def is_binary_extension_url(url):
+    parse_result = urlparse(url)
+    for option in [parse_result.path, parse_result.query]:
+        for binary in BINARY_EXTENSIONS:
+            if option.endswith("." + binary):
+                return binary
+    return None
+
+
 def _retry(
     method,
     max_retries,
@@ -208,6 +219,7 @@ def _retry(
 
     timers[session_key] = time.time()
 
+    file_extension = url.split(".")[-1]
     # result handling
     if err is None or err == "":
         text = r.text[:500] if r is not None else ""
@@ -230,9 +242,10 @@ def _retry(
         pass
     elif r is not None and r.headers and "json" in (r.headers.get("Content-Type", r.headers.get("content-type")) or ""):
         r = r.json()
+    elif is_binary_extension_url(url):
+        r = r.content
     else:
         r = r.text
-
     if use_cache and r is not None:
         result = {"resp": r, "request_info": request_info, "response_ts": time.time()}
         if err:
