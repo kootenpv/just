@@ -1,5 +1,6 @@
 """ File unrelated to the package, except for convenience in deploying """
 import re
+import sys
 import sh
 import os
 
@@ -26,7 +27,6 @@ with open(f"{name}/__init__.py") as f:
 with open(f"{name}/__init__.py", "w") as f:
     f.write(re.sub('__version__ = "[0-9.]+"', '__version__ = "{}"'.format(version), init))
 
-py_version = "python"
 os.system("rm -rf dist/")
-os.system("{} setup.py sdist bdist_wheel".format(py_version))
+os.system(f"{sys.executable} setup.py sdist bdist_wheel")
 os.system("twine upload dist/*")
