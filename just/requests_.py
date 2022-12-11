@@ -374,8 +374,8 @@ def post(
     return result
 
 
-def request(**kwargs):
-    return {"get": get, "post": post}[kwargs.pop("method")](**kwargs)
+def request(data, **kwargs):
+    return {"get": get, "post": post}[data.pop("method")](**data, **kwargs)
 
 
 def request_tree(*args, **kwargs):
