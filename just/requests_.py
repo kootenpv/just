@@ -5,14 +5,9 @@ import hashlib
 from collections import defaultdict
 from urllib.parse import urlparse
 
-import requests
-import requests_viewer  # to extend trees with `view`
-
 from just.dir import mkdir
 from just.path_ import exists, glob, make_path, remove, rename
 from just.read_write import write, read
-from just.forcedip import ForcedIPHTTPSAdapter
-from just.source_ip import SourceAddressAdapter
 
 
 session = None
@@ -117,9 +112,13 @@ def get_session_method(reuse_session, session_key, remote_ip, method, url):
         if session_key not in sessions or expired:
             session = requests.Session()
             if local_address is not None:
+                from just.source_ip import SourceAddressAdapter
+
                 session.mount("http://", SourceAddressAdapter(local_address))
                 session.mount("https://", SourceAddressAdapter(local_address))
             if remote_ip is not None:
+                from just.forcedip import ForcedIPHTTPSAdapter
+
                 session.mount(f"https://{domain_name}", ForcedIPHTTPSAdapter(dest_ip=remote_ip))
             sessions[session_key] = [session, t1]
         if expired:
@@ -127,6 +126,8 @@ def get_session_method(reuse_session, session_key, remote_ip, method, url):
         # e.g. GET or POST
         request_fn = getattr(sessions[session_key][0], method)
     else:
+        import requests
+
         request_fn = getattr(requests, method)
     return request_fn
 
@@ -380,6 +381,7 @@ def request(data, **kwargs):
 
 def request_tree(*args, **kwargs):
     import lxml.html
+    import requests_viewer  # to extend trees with `view`
 
     return lxml.html.fromstring(request(*args, **kwargs))
 
@@ -389,6 +391,7 @@ post.from_cache = from_cache
 
 def get_tree(*args, **kwargs):
     import lxml.html
+    import requests_viewer  # to extend trees with `view`
 
     return lxml.html.fromstring(get(*args, **kwargs))
 
