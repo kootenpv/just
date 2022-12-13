@@ -110,6 +110,8 @@ def get_session_method(reuse_session, session_key, remote_ip, method, url):
         t1 = time.time()
         expired = sessions[session_key][1] + 300 < t1 if session_key in sessions else False
         if session_key not in sessions or expired:
+            import requests
+
             session = requests.Session()
             if local_address is not None:
                 from just.source_ip import SourceAddressAdapter
