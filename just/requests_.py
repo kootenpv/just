@@ -378,6 +378,7 @@ def post(
 
 
 def request(data, **kwargs):
+    data = data.copy()
     return {"get": get, "post": post}[data.pop("method")](**data, **kwargs)
 
 

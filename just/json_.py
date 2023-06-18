@@ -74,9 +74,10 @@ def append(obj, fn):
         f.write(orjson.dumps(obj, default=default).decode() + "\n")
 
 
-def write(obj, fn, option=orjson.OPT_INDENT_2):
+def write(obj, fn, indent=True):
+    # indent 0 = false, 1 = 2 lvls
     if not isinstance(obj, bytes):
-        obj = orjson.dumps(obj, option=option, default=default)
+        obj = orjson.dumps(obj, option=indent)
     if not isinstance(fn, str):
         fn.write(obj)
     else:

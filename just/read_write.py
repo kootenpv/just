@@ -116,7 +116,7 @@ def multi_read_tree(star_path, no_exist=None, unknown_type="html", ignore_except
         yield x, read_tree(x, no_exist, unknown_type, ignore_exceptions)
 
 
-def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name, unknown_type):
+def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name, unknown_type, **kwargs):
     fname = make_path(fname)
     if skip_if_exist and os.path.isfile(fname):  # pragma: no cover
         return False
@@ -140,13 +140,13 @@ def writer(obj, fname, mkdir_no_exist, skip_if_exist, write_func_name, unknown_t
         # actually returns a file handler >.<
         compression = compression[0]
         with compression(fname, "wb") as f:
-            return write_fn(obj, f)
+            return write_fn(obj, f, **kwargs)
     else:
-        return write_fn(obj, fname)
+        return write_fn(obj, fname, **kwargs)
 
 
-def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False, unknown_type="RAISE"):
-    return writer(obj, fname, mkdir_no_exist, skip_if_exist, "write", unknown_type)
+def write(obj, fname, mkdir_no_exist=True, skip_if_exist=False, unknown_type="RAISE", **kwargs):
+    return writer(obj, fname, mkdir_no_exist, skip_if_exist, "write", unknown_type, **kwargs)
 
 
 # only supported for JSON Lines so far.

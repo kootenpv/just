@@ -1,5 +1,6 @@
 import inspect
 import os
+import re
 import glob2
 import errno
 import functools
@@ -8,6 +9,9 @@ __cached_just_path = None
 
 
 def glob(path, sort_reverse=False):
+    res = re.findall("([$][A-Z_]+)", path)
+    for x in res:
+        path = path.replace(x, os.environ[x[1:]])
     path = make_path(path)
     return sorted(glob2.glob(path), reverse=sort_reverse)
 

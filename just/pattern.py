@@ -4,7 +4,7 @@ from datetime import datetime
 from just import iread
 
 
-def parse_specials(special_str):
+def parse_specials(special_str):  # -> name, cast
     if not special_str:
         return "", "str"
     if "@" not in special_str:
@@ -89,4 +89,4 @@ class Pattern:
         return {k: v for k, v in zip(self.names, res) if isinstance(k, int) or not k.startswith("_") and k}
 
     def stream(self, fname):
-        return [self.find_dict(x) for x in iread(fname)]
+        return [res for x in iread(fname) if (res := self.find_dict(x))]
