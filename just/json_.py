@@ -77,7 +77,7 @@ def append(obj, fn):
 def write(obj, fn, indent=True):
     # indent 0 = false, 1 = 2 lvls
     if not isinstance(obj, bytes):
-        obj = orjson.dumps(obj, option=indent)
+        obj = orjson.dumps(obj, option=int(indent))
     if not isinstance(fn, str):
         fn.write(obj)
     else:
