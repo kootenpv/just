@@ -1,18 +1,16 @@
+import hashlib
 import os
 import time
 import warnings
-import hashlib
 from collections import defaultdict
 from urllib.parse import urlparse
 
-from just.dir import mkdir
-from just.path_ import exists, glob, make_path, remove, rename
-from just.read_write import write, read
-
+from just.path_ import exists, glob, make_path, remove
+from just.read_write import read, write
 
 session = None
 PER_FOLDER = 3000
-BINARY_EXTENSIONS = {"jpg", "png", "jpeg", "png"}
+BINARY_EXTENSIONS = {"jpg", "png", "jpeg"}
 
 caches = {}
 timers = {}
@@ -58,7 +56,7 @@ def update_obj_count(domain, dir_name, obj_type):
     return obj_counts[(domain, obj_type)]
 
 
-def get_cache_file_name(domain, request_info, compression=".gz"):
+def get_cache_file_name(domain, request_info, compression=".gz") -> str:
     from preconvert.output import json
 
     key = json.dumps(request_info)
@@ -84,7 +82,7 @@ def get_obj_type(cache_key):
     return obj_type, fname
 
 
-def get_cache_file_name_str(domain, cache_key, compression=".gz"):
+def get_cache_file_name_str(domain, cache_key, compression=".gz") -> str:
     obj_type, fname = get_obj_type(cache_key)
     initial_part = f"~/.just_requests/{domain}{obj_type}"
     partition = update_obj_count(domain, initial_part, obj_type) // PER_FOLDER
@@ -150,6 +148,7 @@ def _retry(
     raw,
     caching,
     cache_compression,
+    cache_ttl,
     sleep_time,
     reuse_session,
     local_address,
@@ -157,8 +156,7 @@ def _retry(
     refresh_session_on_error,
     kwargs,
 ):
-    import requests
-    from requests import RequestException, Session
+    from requests import RequestException
     from requests.utils import cookiejar_from_dict
 
     tries = 0
@@ -167,10 +165,10 @@ def _retry(
 
     use_cache, *request_info = caching
 
-    cache_file_name = get_cache_file_name(domain_name, request_info, cache_compression)
+    cache_file_name = os.path.expanduser(get_cache_file_name(domain_name, request_info, cache_compression))
 
     if exists(cache_file_name):
-        if use_cache:
+        if use_cache and (not cache_ttl or time.time() < cache_ttl + os.path.getmtime(cache_file_name)):
             last_cache_fname[domain_name] = cache_file_name
             return read(cache_file_name)["resp"]
         if use_cache is None:
@@ -214,15 +212,14 @@ def _retry(
                 err = ""
                 r = None
                 break
-            else:
-                if refresh_session_on_error:
-                    request_fn = get_session_method(reuse_session, session_key, remote_ip, method, kwargs["url"])
+            elif refresh_session_on_error:
+                request_fn = get_session_method(reuse_session, session_key, remote_ip, method, kwargs["url"])
             tries += 1
             time.sleep(delay_base**tries)
 
     timers[session_key] = time.time()
 
-    file_extension = url.split(".")[-1]
+    url.split(".")[-1]
     # result handling
     if err is None or err == "":
         text = r.text[:500] if r is not None else ""
@@ -268,6 +265,7 @@ def get(
     raw=False,
     use_cache=False,
     cache_compression=".gz",
+    cache_ttl=0,
     sleep_time=None,
     fname=None,
     reuse_session=True,
@@ -295,6 +293,7 @@ def get(
         raw,
         caching,
         cache_compression,
+        cache_ttl,
         sleep_time,
         reuse_session,
         local_address,
@@ -312,7 +311,7 @@ def get(
 get.from_cache = from_cache
 
 
-def warn_cache():
+def warn_cache() -> None:
     warnings.warn(
         "This attribute is deprecated as boolean, it still works but advised to make a str key",
         DeprecationWarning,
@@ -330,6 +329,7 @@ def post(
     delay_base=3,
     use_cache=False,
     cache_compression=".gz",
+    cache_ttl=0,
     sleep_time=None,
     fname=None,
     reuse_session=True,
@@ -363,6 +363,7 @@ def post(
         raw,
         caching,
         cache_compression,
+        cache_ttl,
         sleep_time,
         reuse_session,
         local_address,
@@ -384,9 +385,14 @@ def request(data, **kwargs):
 
 def request_tree(*args, **kwargs):
     import lxml.html
-    import requests_viewer  # to extend trees with `view`
+    import requests_viewer
 
-    return lxml.html.fromstring(request(*args, **kwargs))
+    assert requests_viewer is not None
+
+    html = request(*args, **kwargs)
+    if html is None:
+        return None
+    return lxml.html.fromstring(html)
 
 
 post.from_cache = from_cache
@@ -394,7 +400,9 @@ post.from_cache = from_cache
 
 def get_tree(*args, **kwargs):
     import lxml.html
-    import requests_viewer  # to extend trees with `view`
+    import requests_viewer
+
+    assert requests_viewer is not None
 
     return lxml.html.fromstring(get(*args, **kwargs))
 
@@ -405,14 +413,14 @@ def post_tree(*args, **kwargs):
     return lxml.html.fromstring(post(*args, **kwargs))
 
 
-def save_session(name, session):
+def save_session(name, session) -> None:
     from requests.utils import dict_from_cookiejar
 
-    if any(["Session" in x.__name__ for x in session.__class__.__mro__]):
+    if any("Session" in x.__name__ for x in session.__class__.__mro__):
         try:
             print("trf")
             session.transfer_driver_cookies_to_session()
         except Exception as e:
             print("ERR", e)
         session = {"headers": session.headers, "cookies": dict_from_cookiejar(session.cookies)}
-    write(session, f"~/.just_sessions/" + name + ".json")
+    write(session, "~/.just_sessions/" + name + ".json")

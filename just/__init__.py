@@ -22,6 +22,7 @@ from just.path_ import (
 )
 from just.read_write import *
 from just.requests_ import request, request_tree, get, get_tree, post, post_tree, save_session
+from just.date import yesterday
 from just.dir import mkdir
 from just.log import log
 from just.jpath import json_extract, jpath
@@ -32,4 +33,4 @@ from just.pattern import Pattern
 # In [20]: with lzma.open("fuck.xz") as f: hh=f.read()
 
 __project__ = "just"
-__version__ = "0.8.160"
+__version__ = "0.8.161"

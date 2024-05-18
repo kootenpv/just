@@ -1,9 +1,10 @@
+import errno
+import functools
 import inspect
 import os
 import re
+
 import glob2
-import errno
-import functools
 
 __cached_just_path = None
 
@@ -13,7 +14,10 @@ def glob(path, sort_reverse=False):
     for x in res:
         path = path.replace(x, os.environ[x[1:]])
     path = make_path(path)
-    return sorted(glob2.glob(path), reverse=sort_reverse)
+    output = glob2.glob(path)
+    if sort_reverse is not None:
+        output = sorted(output, reverse=sort_reverse)
+    return output
 
 
 def get_just_env_path():
@@ -55,7 +59,7 @@ def get_just_path():
 @functools.lru_cache(maxsize=1_000_000)
 def make_path(filename):
     just_path = get_just_path()
-    if not isinstance(filename, (str, bytes)):
+    if not isinstance(filename, str | bytes):
         filename = filename.name.encode("utf8").decode()
     filename = filename.replace("file://", "")
     path = os.path.join(just_path, os.path.expanduser(filename))
@@ -68,7 +72,7 @@ def exists(fname):
     return os.path.isfile(make_path(fname))
 
 
-def rename(src, dest, no_exist=None):
+def rename(src, dest, no_exist=None) -> bool:
     src = make_path(src)
     dest = make_path(dest)
     if not dest.endswith("/"):
@@ -84,7 +88,7 @@ def rename(src, dest, no_exist=None):
 
 def _as_glob(dir_name, recursive):
     dir_name = make_path(dir_name)
-    if not "*" in dir_name:
+    if "*" not in dir_name:
         if dir_name.endswith("/"):
             dir_name += "*"
         else:
@@ -102,7 +106,7 @@ def ls(dir_name, recursive=False, no_dirs=False):
         return glob(dir_name)
 
 
-def mkdir(path, mode=0o777):
+def mkdir(path, mode=0o777) -> None:
     path = make_path(path)
     try:
         os.makedirs(path, mode)
@@ -115,11 +119,12 @@ def mkdir(path, mode=0o777):
 
 
 def remove(file_path, no_exist=False, allow_recursive=False):
-    if isinstance(file_path, (tuple, list)):
+    if isinstance(file_path, tuple | list):
         file_path = os.path.join(*file_path)
     if "*" in file_path:
         if not allow_recursive:
-            raise IOError("Cannot remove wildcard unless allow_recursive=True")
+            msg = "Cannot remove wildcard unless allow_recursive=True"
+            raise OSError(msg)
         paths = glob(file_path)
         for fn in sorted(paths, key=lambda x: -len(x)):
             os.remove(fn)
@@ -133,11 +138,13 @@ def remove(file_path, no_exist=False, allow_recursive=False):
             shutil.rmtree(file_path)
             return True
         else:
-            raise IOError("Cannot remove directory unless allow_recursive=True")
+            msg = "Cannot remove directory unless allow_recursive=True"
+            raise OSError(msg)
     # if there is a default value, return that if no file/dir found when attempting to remove
     if no_exist is not None:
         return no_exist
-    raise IOError("File '{}' does not exist.".format(file_path))
+    msg = f"File '{file_path}' does not exist."
+    raise OSError(msg)
 
 
 def most_recent(file_path):
