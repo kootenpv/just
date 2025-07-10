@@ -1,14 +1,15 @@
-import warnings
-from just.dt import parse_dt
-from collections import defaultdict
-import orjson
 import json
+import warnings
+from collections import defaultdict
+
+import orjson
+from just.dt import parse_dt
 
 parse_knowledge = defaultdict(lambda: (0, 0))
 
 
 def default(obj):
-    if isinstance(obj, set):
+    if isinstance(obj, tuple | set):
         return list(obj)
     tp = str(type(obj))
     if ".float" in tp:
@@ -67,17 +68,18 @@ def read(fn, warn=False, parse_dt=False):
         return data
 
 
-def append(obj, fn):
+def append(obj, fn) -> None:
     if not isinstance(fn, str):
-        raise TypeError("Cannot append to compression")
+        msg = "Cannot append to compression"
+        raise TypeError(msg)
     with open(fn, "a+") as f:
         f.write(orjson.dumps(obj, default=default).decode() + "\n")
 
 
-def write(obj, fn, indent=True):
+def write(obj, fn, indent=True) -> None:
     # indent 0 = false, 1 = 2 lvls
     if not isinstance(obj, bytes):
-        obj = orjson.dumps(obj, option=int(indent))
+        obj = orjson.dumps(obj, option=int(indent), default=default)
     if not isinstance(fn, str):
         fn.write(obj)
     else:
@@ -87,7 +89,8 @@ def write(obj, fn, indent=True):
 
 def iread(fn):
     if not isinstance(fn, str):
-        raise TypeError("Cannot iteratively read compressed file now")
+        msg = "Cannot iteratively read compressed file now"
+        raise TypeError(msg)
     with open(fn) as f:
         for i, line in enumerate(f):
             try:
@@ -95,14 +98,15 @@ def iread(fn):
                 if parse_dt:
                     data = parse_datetimes(data)
                 yield data
-            except Exception as e:
-                msg = "JSON-L parsing error in line number {} in the jsonl file".format(i)
+            except Exception:
+                msg = f"JSON-L parsing error in line number {i} in the jsonl file"
                 raise Exception(msg, line)
 
 
-def iwrite(obj, fn):
+def iwrite(obj, fn) -> None:
     if not isinstance(fn, str):
-        raise TypeError("Cannot iteratively write compressed")
+        msg = "Cannot iteratively write compressed"
+        raise TypeError(msg)
     with open(fn, "w") as f:
         for chunk in obj:
             f.write(orjson.dumps(chunk, default=default).decode() + "\n")

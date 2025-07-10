@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "just"
-version = "0.8.163"
+version = "0.8.165"
 description = "Automatically just read and write files based on extension."
 authors = [{name = "Pascal van Kooten", email = "kootenpv@gmail.com"}]
 license = {text = "MIT"}
