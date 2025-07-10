@@ -57,11 +57,11 @@ def update_obj_count(domain, dir_name, obj_type):
 
 
 def get_cache_file_name(domain, request_info, compression=".gz") -> str:
-    from preconvert.output import json
+    import orjson
 
-    key = json.dumps(request_info)
+    key = orjson.dumps(request_info)
     m = hashlib.md5()
-    m.update(key.encode("utf8"))
+    m.update(key)
     md5 = m.hexdigest()
     dir_name, fname = md5[:3], md5[3:]
     if not compression:
