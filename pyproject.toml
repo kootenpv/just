@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "just"
+version = "0.8.163"
+description = "Automatically just read and write files based on extension."
+authors = [{name = "Pascal van Kooten", email = "kootenpv@gmail.com"}]
+license = {text = "MIT"}
+readme = "README.rst"
+requires-python = ">=3.5"
+classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: Customer Service",
+    "Intended Audience :: System Administrators",
+    "Operating System :: Microsoft",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Unix",
+    "Operating System :: POSIX",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Software Distribution",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "pyyaml",
+    "glob2",
+    "orjson",
+    "requests",
+    "requests_viewer",
+    "ciso8601",
+    "lxml",
+]
+
+[project.urls]
+Homepage = "https://github.com/kootenpv/just"
+
+[project.scripts]
+just = "just.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["just*"]
+
+[bdist_rpm]
+doc_files = ["README.rst"]
+
+[tool.wheel]
+universal = true
